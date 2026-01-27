@@ -23,6 +23,92 @@ smelt validate
 smelt commit --intent <intent-id>
 ```
 
+## End-to-End Example
+
+Here's a complete workflow demonstrating Smelt's semantic version control:
+
+```bash
+# 1. Initialize Smelt in your repository
+$ smelt init --wait
+Initializing Smelt in "/Users/dev/my-project"...
+  Database created: "/Users/dev/my-project/.smelt/smelt.db"
+  Graph storage created: "/Users/dev/my-project/.smelt/graph"
+  Git hooks installed
+  Configuration created
+
+Indexing repository...
+  Scanning files: 0 found
+  Indexing complete.
+
+✓ Smelt initialized successfully!
+
+# 2. Create an intent describing your goal
+$ smelt intent create --goal "Add greeting message to CLI startup"
+Created intent: fce32c4c
+
+  Goal: Add greeting message to CLI startup
+  Status: In Progress
+  Baseline snapshot: 8795a78d
+
+Now make your code changes, then run 'smelt status' to see semantic changes.
+
+# 3. Make your code changes (e.g., add a function to main.rs)
+# ... edit files ...
+
+# 4. Check semantic status
+$ smelt status
+Intent: fce32c4c (Add greeting message to CLI startup)
+Status: In Progress
+
+Changed files (1):
+  M src/main.rs
+
+Semantic changes:
+  (Computing delta from 1 files...)
+
+Impact Summary:
+  Files affected: 1
+
+# 5. Validate changes against architectural rules
+$ smelt validate
+Validating 1 changed files...
+
+Validation Results:
+==================
+
+✅ Validation passed
+
+# 6. Commit with semantic delta
+$ smelt commit --intent fce32c4c
+Committing intent: fce32c4c (Add greeting message to CLI startup)
+  Staged 1 files
+  Computing semantic delta...
+  Running validation...
+    Validation: passed
+  Creating commit...
+
+✓ Committed: 06d0a797
+   Intent: fce32c4c
+   Delta:  5eeac27c
+   Files:  1 changed
+```
+
+The resulting git commit includes semantic metadata:
+
+```
+commit 06d0a797559d1791f6dc0b5dc3742897e1446e60
+Author: Developer <dev@example.com>
+Date:   Mon Jan 26 22:23:17 2026 -0800
+
+    Add greeting message to CLI startup
+
+    Intent: fce32c4c-434e-44bb-bcb8-b2c747756279
+    Delta: 5eeac27c-ed52-45c1-ab07-3517a7044a85
+
+ src/main.rs | 5 +++++
+ 1 file changed, 5 insertions(+)
+```
+
 ## Documentation
 
 - [Architecture Overview](./architecture.md) - System design and component structure
