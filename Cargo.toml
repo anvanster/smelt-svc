@@ -55,9 +55,9 @@ codegraph = "0.1.1"
 codegraph-parser-api = "0.2.0"
 
 # Internal crates
-smelt-core = { path = "crates/smelt-core" }
-smelt-validator = { path = "crates/smelt-validator" }
-smelt-memory = { path = "crates/smelt-memory" }
+smelt-core = { version = "0.1.0", path = "crates/smelt-core" }
+smelt-validator = { version = "0.1.0", path = "crates/smelt-validator" }
+smelt-memory = { version = "0.1.0", path = "crates/smelt-memory" }
 
 # Embeddings
 fastembed = "4"

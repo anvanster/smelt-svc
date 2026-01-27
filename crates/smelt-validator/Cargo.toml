@@ -7,7 +7,7 @@ repository.workspace = true
 description = "Validation engine for Smelt semantic version control"
 
 [dependencies]
-smelt-core = { path = "../smelt-core" }
+smelt-core.workspace = true
 crucible-core = "0.1.11"
 serde = { workspace = true }
 serde_json = { workspace = true }
