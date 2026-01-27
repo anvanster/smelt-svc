@@ -1,0 +1,30 @@
+[package]
+name = "smelt-memory"
+version = "0.1.0"
+edition = "2021"
+description = "Contextual memory system for Smelt semantic version control"
+
+[dependencies]
+# Workspace dependencies
+smelt-core = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+chrono = { workspace = true }
+uuid = { workspace = true }
+tracing = { workspace = true }
+tokio = { workspace = true }
+rusqlite = { workspace = true }
+async-trait = { workspace = true }
+
+# Embeddings
+fastembed = { workspace = true }
+
+[dev-dependencies]
+tempfile = "3"
+tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
+criterion = { workspace = true }
+
+[[bench]]
+name = "memory_benchmarks"
+harness = false

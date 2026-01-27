@@ -1,0 +1,27 @@
+# Rust build artifacts
+target/
+Cargo.lock
+
+# Claude Code configuration
+.claude/
+
+# MCP Context Server data
+.stellarion/
+
+# Fastembed model cache
+.fastembed_cache/
+
+# MCP configuration
+.mcp.json
+
+# Logs
+logs/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store

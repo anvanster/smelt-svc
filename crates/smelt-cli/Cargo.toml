@@ -1,0 +1,32 @@
+[package]
+name = "smelt-cli"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "CLI for Smelt semantic version control"
+rust-version.workspace = true
+
+[[bin]]
+name = "smelt"
+path = "src/main.rs"
+
+[dependencies]
+# Workspace dependencies
+smelt-core.workspace = true
+smelt-validator.workspace = true
+smelt-memory.workspace = true
+tokio.workspace = true
+clap.workspace = true
+anyhow.workspace = true
+chrono.workspace = true
+uuid.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+log.workspace = true
+env_logger.workspace = true
+
+# Backup support
+tar = "0.4"
+
+# Shell completions
+clap_complete = "4"
