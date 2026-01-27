@@ -9,6 +9,15 @@ use std::io;
 mod commands;
 mod ui;
 
+/// Smelt version information
+pub const VERSION: &str = env!("CARGO_PKG_VERSION");
+pub const BUILD_DATE: &str = "2024-01-27";
+
+/// Get full version string with build info
+pub fn version_string() -> String {
+    format!("smelt {} (built {})", VERSION, BUILD_DATE)
+}
+
 #[derive(Parser)]
 #[command(name = "smelt")]
 #[command(about = "Semantic version control for AI-native development")]
