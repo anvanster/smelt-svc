@@ -50,9 +50,9 @@ git2 = "0.19"
 # Database
 rusqlite = { version = "0.32", features = ["bundled"] }
 
-# CodeGraph (from codegraph-monorepo)
-codegraph = { path = "../codegraph-monorepo/crates/codegraph" }
-codegraph-parser-api = { path = "../codegraph-monorepo/crates/codegraph-parser-api" }
+# CodeGraph (from crates.io)
+codegraph = "0.1.1"
+codegraph-parser-api = "0.2.0"
 
 # Internal crates
 smelt-core = { path = "crates/smelt-core" }

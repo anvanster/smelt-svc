@@ -3,6 +3,7 @@ name = "smelt-api"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
+repository.workspace = true
 description = "REST API server for Smelt semantic version control"
 rust-version.workspace = true
 

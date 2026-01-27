@@ -3,6 +3,7 @@ name = "smelt-cli"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
+repository.workspace = true
 description = "CLI for Smelt semantic version control"
 rust-version.workspace = true
 
