@@ -18,6 +18,11 @@ pub fn version_string() -> String {
     format!("smelt {} (built {})", VERSION, BUILD_DATE)
 }
 
+/// Display startup greeting
+pub fn greeting() -> &'static str {
+    "Welcome to Smelt - Semantic Version Control"
+}
+
 #[derive(Parser)]
 #[command(name = "smelt")]
 #[command(about = "Semantic version control for AI-native development")]
