@@ -80,8 +80,12 @@ pub async fn run(
         intent.goal
     );
 
-    // Get changed files
-    let changed_files = git.changed_files()?;
+    // Get changed files (excluding .smelt/ directory)
+    let changed_files: Vec<_> = git
+        .changed_files()?
+        .into_iter()
+        .filter(|p| !p.starts_with(".smelt") && !p.to_string_lossy().contains("/.smelt/"))
+        .collect();
     if changed_files.is_empty() {
         println!("No changes to commit.");
         println!();
@@ -90,8 +94,12 @@ pub async fn run(
         return Ok(());
     }
 
-    // Stage all changed files
-    let staged_files = git.staged_files()?;
+    // Stage all changed files (excluding .smelt/)
+    let staged_files: Vec<_> = git
+        .staged_files()?
+        .into_iter()
+        .filter(|p| !p.starts_with(".smelt") && !p.to_string_lossy().contains("/.smelt/"))
+        .collect();
     if staged_files.is_empty() {
         git.stage_files(&changed_files)?;
         println!("  Staged {} files", changed_files.len());

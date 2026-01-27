@@ -2,6 +2,9 @@
 target/
 Cargo.lock
 
+# Smelt internal data
+.smelt/
+
 # Claude Code configuration
 .claude/
 

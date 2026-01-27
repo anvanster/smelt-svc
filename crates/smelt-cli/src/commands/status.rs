@@ -31,8 +31,12 @@ pub async fn run(full: bool) -> Result<()> {
         println!("Status: In Progress");
         println!();
 
-        // Get changed files
-        let changed_files = git.changed_files()?;
+        // Get changed files (excluding .smelt/ directory)
+        let changed_files: Vec<_> = git
+            .changed_files()?
+            .into_iter()
+            .filter(|p| !p.starts_with(".smelt") && !p.to_string_lossy().contains("/.smelt/"))
+            .collect();
 
         if changed_files.is_empty() {
             println!("No changes detected.");
@@ -65,8 +69,12 @@ pub async fn run(full: bool) -> Result<()> {
         println!("No active intent.");
         println!();
 
-        // Show changed files anyway
-        let changed_files = git.changed_files()?;
+        // Show changed files anyway (excluding .smelt/ directory)
+        let changed_files: Vec<_> = git
+            .changed_files()?
+            .into_iter()
+            .filter(|p| !p.starts_with(".smelt") && !p.to_string_lossy().contains("/.smelt/"))
+            .collect();
         if !changed_files.is_empty() {
             println!("Changed files ({}):", changed_files.len());
             for file in &changed_files {
