@@ -1,29 +1,18 @@
 //! Benchmarks for smelt-memory operations
 
 use criterion::{black_box, criterion_group, criterion_main, Criterion, BenchmarkId};
-use smelt_memory::{Episode, EpisodeOutcome, SmeltMemory, TaskType};
-use chrono::Utc;
-use uuid::Uuid;
+use smelt_memory::{Episode, EpisodeOutcome, SmeltMemory};
 use tempfile::TempDir;
 
-fn create_test_episode() -> Episode {
-    Episode {
-        id: Uuid::new_v4(),
-        project: Some("benchmark-project".to_string()),
-        session_id: Some(Uuid::new_v4()),
-        summary: "Test episode for benchmarking memory operations".to_string(),
-        task_type: TaskType::Feature,
-        outcome: EpisodeOutcome::Success,
-        tags: vec!["rust".to_string(), "benchmark".to_string()],
-        files_modified: vec!["src/main.rs".to_string(), "src/lib.rs".to_string()],
-        errors_resolved: Vec::new(),
-        embedding: None,
-        utility_score: 0.0,
-        helpful_count: 0,
-        not_helpful_count: 0,
-        created_at: Utc::now(),
-        updated_at: Utc::now(),
-    }
+fn create_test_episode(suffix: &str) -> Episode {
+    Episode::new(
+        format!("Test episode {} for benchmarking memory operations", suffix),
+        "feature".to_string(),
+        EpisodeOutcome::Success,
+    )
+    .with_project("benchmark-project".to_string())
+    .with_tags(vec!["rust".to_string(), "benchmark".to_string()])
+    .with_files(vec!["src/main.rs".to_string(), "src/lib.rs".to_string()])
 }
 
 fn bench_episode_storage(c: &mut Criterion) {
@@ -35,9 +24,11 @@ fn bench_episode_storage(c: &mut Criterion) {
     group.bench_function("capture_episode", |b| {
         let temp_dir = TempDir::new().unwrap();
         let mut memory = SmeltMemory::open(temp_dir.path()).unwrap();
+        let mut counter = 0;
 
         b.iter(|| {
-            let episode = create_test_episode();
+            counter += 1;
+            let episode = create_test_episode(&counter.to_string());
             memory.capture(black_box(episode)).unwrap();
         });
     });
@@ -60,8 +51,7 @@ fn bench_episode_retrieval(c: &mut Criterion) {
 
                 // Pre-populate
                 for i in 0..size {
-                    let mut episode = create_test_episode();
-                    episode.summary = format!("Test episode {} for benchmarking", i);
+                    let episode = create_test_episode(&format!("prepop_{}", i));
                     memory.capture(episode).unwrap();
                 }
 
@@ -86,8 +76,7 @@ fn bench_utility_computation(c: &mut Criterion) {
 
         // Pre-populate with episodes
         for i in 0..20 {
-            let mut episode = create_test_episode();
-            episode.summary = format!("Test episode {} for utility propagation", i);
+            let episode = create_test_episode(&format!("utility_{}", i));
             let id = memory.capture(episode).unwrap();
 
             // Add some feedback

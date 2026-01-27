@@ -1,0 +1,17 @@
+[package]
+name = "smelt-integration-tests"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+smelt-core = { path = "../../crates/smelt-core" }
+smelt-validator = { path = "../../crates/smelt-validator" }
+smelt-memory = { path = "../../crates/smelt-memory" }
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1.0", features = ["v4", "serde"] }
+tempfile = "3"
+
+[[test]]
+name = "workflow"
+path = "workflow_test.rs"
