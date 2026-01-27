@@ -1,4 +1,5 @@
 # Rust build artifacts
+ignore/
 target/
 Cargo.lock
 

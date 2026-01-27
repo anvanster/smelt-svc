@@ -1,6 +1,12 @@
-# Smelt Documentation
+# Smelt
 
 Smelt is a semantic version control system that layers over Git, providing intent-driven development with AI-native workflows.
+
+## Installation
+
+```bash
+cargo install smelt-cli
+```
 
 ## Quick Start
 
