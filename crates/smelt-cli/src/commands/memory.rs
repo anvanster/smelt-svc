@@ -118,9 +118,15 @@ pub async fn feedback(episode_id: String, helpful: bool) -> Result<()> {
     memory.record_feedback(id, helpful)?;
 
     if helpful {
-        println!("Recorded positive feedback for episode {}", &episode_id[..8]);
+        println!(
+            "Recorded positive feedback for episode {}",
+            &episode_id[..8]
+        );
     } else {
-        println!("Recorded negative feedback for episode {}", &episode_id[..8]);
+        println!(
+            "Recorded negative feedback for episode {}",
+            &episode_id[..8]
+        );
     }
 
     Ok(())
@@ -144,7 +150,14 @@ pub async fn stats() -> Result<()> {
 pub async fn propagate(temporal: bool) -> Result<()> {
     let mut memory = get_memory()?;
 
-    println!("Running utility propagation{}...", if temporal { " with temporal credit" } else { "" });
+    println!(
+        "Running utility propagation{}...",
+        if temporal {
+            " with temporal credit"
+        } else {
+            ""
+        }
+    );
 
     let result = memory.propagate_utility(temporal)?;
 

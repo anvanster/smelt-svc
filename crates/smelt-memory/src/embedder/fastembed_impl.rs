@@ -20,8 +20,11 @@ impl FastEmbedder {
 
     /// Create a FastEmbedder with a specific model
     pub fn with_model(model: EmbeddingModel) -> MemoryResult<Self> {
-        let embedding = TextEmbedding::try_new(InitOptions::new(model).with_show_download_progress(true))
-            .map_err(|e| MemoryError::Embedding(format!("Failed to initialize embedding model: {}", e)))?;
+        let embedding =
+            TextEmbedding::try_new(InitOptions::new(model).with_show_download_progress(true))
+                .map_err(|e| {
+                    MemoryError::Embedding(format!("Failed to initialize embedding model: {}", e))
+                })?;
 
         // Get dimension from first test embedding
         let dimension = match embedding.embed(vec!["test"], None) {
@@ -131,7 +134,10 @@ mod tests {
         let sim_12 = cosine_sim(&e1, &e2);
         let sim_13 = cosine_sim(&e1, &e3);
 
-        assert!(sim_12 > sim_13, "Similar texts should have higher similarity");
+        assert!(
+            sim_12 > sim_13,
+            "Similar texts should have higher similarity"
+        );
     }
 
     #[cfg(test)]

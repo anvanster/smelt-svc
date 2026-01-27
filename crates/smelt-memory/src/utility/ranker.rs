@@ -72,18 +72,17 @@ impl UtilityRanker {
             .collect();
 
         // Sort by score descending
-        ranked.sort_by(|a, b| b.score.partial_cmp(&a.score).unwrap_or(std::cmp::Ordering::Equal));
+        ranked.sort_by(|a, b| {
+            b.score
+                .partial_cmp(&a.score)
+                .unwrap_or(std::cmp::Ordering::Equal)
+        });
 
         ranked
     }
 
     /// Compute combined score for an episode
-    fn compute_score(
-        &self,
-        episode: &Episode,
-        similarity: f64,
-        now: chrono::DateTime<Utc>,
-    ) -> f64 {
+    fn compute_score(&self, episode: &Episode, similarity: f64, now: chrono::DateTime<Utc>) -> f64 {
         // Apply decay to utility
         let decayed_utility = apply_decay(
             episode.utility,
@@ -93,15 +92,12 @@ impl UtilityRanker {
         );
 
         // Calculate feedback score using Wilson
-        let feedback_score =
-            wilson_score_default(episode.helpful_count, episode.feedback_count);
+        let feedback_score = wilson_score_default(episode.helpful_count, episode.feedback_count);
 
         // Combine scores
-        let score = self.config.similarity_weight * similarity
+        self.config.similarity_weight * similarity
             + self.config.utility_weight * decayed_utility
-            + self.config.feedback_weight * feedback_score;
-
-        score
+            + self.config.feedback_weight * feedback_score
     }
 
     /// Update utility based on feedback
@@ -115,7 +111,7 @@ impl UtilityRanker {
     ) -> f64 {
         let feedback_value = if helpful { 1.0 } else { 0.0 };
         let new_utility = episode.utility + learning_rate * (feedback_value - episode.utility);
-        new_utility.max(0.0).min(1.0)
+        new_utility.clamp(0.0, 1.0)
     }
 }
 
@@ -209,8 +205,8 @@ mod tests {
     fn test_utility_bounds() {
         let ranker = UtilityRanker::new();
 
-        let mut high = make_episode("High", 0.99, 0, 0);
-        let mut low = make_episode("Low", 0.01, 0, 0);
+        let high = make_episode("High", 0.99, 0, 0);
+        let low = make_episode("Low", 0.01, 0, 0);
 
         // Should not exceed 1.0
         let new_high = ranker.update_utility_from_feedback(&high, true, 0.5);

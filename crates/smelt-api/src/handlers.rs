@@ -8,7 +8,9 @@ use axum::{
 };
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
-use smelt_core::{Author, AuthorType, ContextLinks, IntentRecord, IntentStatus, SmeltGraph, SqliteStorage};
+use smelt_core::{
+    Author, AuthorType, ContextLinks, IntentRecord, IntentStatus, SmeltGraph, SqliteStorage,
+};
 use smelt_memory::SmeltMemory;
 use smelt_validator::SmeltValidator;
 use uuid::Uuid;
@@ -215,7 +217,9 @@ pub async fn create_intent(
         created_at: Utc::now(),
         author: Author {
             name: req.author_name.unwrap_or_else(|| "API User".to_string()),
-            email: req.author_email.unwrap_or_else(|| "api@smelt.local".to_string()),
+            email: req
+                .author_email
+                .unwrap_or_else(|| "api@smelt.local".to_string()),
             author_type: AuthorType::AI,
         },
         goal: req.goal,
@@ -280,10 +284,7 @@ pub async fn get_intent(
 }
 
 /// Get a specific delta
-pub async fn get_delta(
-    State(state): State<AppState>,
-    Path(id): Path<String>,
-) -> impl IntoResponse {
+pub async fn get_delta(State(state): State<AppState>, Path(id): Path<String>) -> impl IntoResponse {
     let storage = match SqliteStorage::open(&state.db_path) {
         Ok(s) => s,
         Err(e) => {
@@ -515,7 +516,7 @@ pub async fn memory_search(
             .into_response();
     }
 
-    let mut memory = match SmeltMemory::open(&state.memory_path) {
+    let memory = match SmeltMemory::open(&state.memory_path) {
         Ok(m) => m,
         Err(e) => {
             return (
@@ -713,7 +714,11 @@ pub async fn episode_feedback(
                 message: format!(
                     "Feedback recorded: episode {} marked as {}",
                     id,
-                    if req.helpful { "helpful" } else { "not helpful" }
+                    if req.helpful {
+                        "helpful"
+                    } else {
+                        "not helpful"
+                    }
                 ),
             })
             .into_response()

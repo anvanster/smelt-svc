@@ -9,11 +9,7 @@ use smelt_core::{
 use smelt_validator::SmeltValidator;
 use uuid::Uuid;
 
-pub async fn run(
-    intent_id: Option<String>,
-    strict: bool,
-    show_config: bool,
-) -> Result<()> {
+pub async fn run(intent_id: Option<String>, strict: bool, show_config: bool) -> Result<()> {
     let cwd = std::env::current_dir()?;
     let smelt_dir = cwd.join(".smelt");
 
@@ -99,9 +95,11 @@ pub async fn run(
     if outcome.info_count > 0 {
         println!();
         println!("Info ({}):", outcome.info_count);
-        for violation in outcome.violations.iter().filter(|v| {
-            v.severity == smelt_validator::ValidationSeverity::Info
-        }) {
+        for violation in outcome
+            .violations
+            .iter()
+            .filter(|v| v.severity == smelt_validator::ValidationSeverity::Info)
+        {
             println!("  ℹ️  {} - {}", violation.rule, violation.message);
         }
     }
@@ -138,7 +136,10 @@ pub async fn run(
     if outcome.passed {
         println!("✅ Validation passed");
         if outcome.warning_count > 0 {
-            println!("   {} warning(s) - consider addressing before commit", outcome.warning_count);
+            println!(
+                "   {} warning(s) - consider addressing before commit",
+                outcome.warning_count
+            );
         }
     } else {
         println!("❌ Validation failed: {} error(s)", outcome.error_count);

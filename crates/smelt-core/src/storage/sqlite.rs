@@ -95,7 +95,7 @@ impl SqliteStorage {
             .query_row(
                 "SELECT * FROM intents WHERE id = ?1",
                 [id.to_string()],
-                |row| deserialize_intent(row),
+                deserialize_intent,
             )
             .optional()?;
 
@@ -114,7 +114,7 @@ impl SqliteStorage {
             .query_row(
                 "SELECT * FROM intents WHERE id LIKE ?1 LIMIT 1",
                 [pattern],
-                |row| deserialize_intent(row),
+                deserialize_intent,
             )
             .optional()?;
 
@@ -140,7 +140,7 @@ impl SqliteStorage {
         };
 
         let mut stmt = self.conn.prepare(&query)?;
-        let rows = stmt.query_map([], |row| deserialize_intent(row))?;
+        let rows = stmt.query_map([], deserialize_intent)?;
 
         for row in rows {
             intents.push(row??);
@@ -193,7 +193,7 @@ impl SqliteStorage {
             .query_row(
                 "SELECT * FROM deltas WHERE id = ?1",
                 [id.to_string()],
-                |row| deserialize_delta(row),
+                deserialize_delta,
             )
             .optional()?;
 
@@ -207,11 +207,11 @@ impl SqliteStorage {
     /// Get deltas for an intent
     pub fn get_deltas_for_intent(&self, intent_id: IntentId) -> Result<Vec<SemanticDelta>> {
         let mut deltas = Vec::new();
-        let mut stmt = self.conn.prepare(
-            "SELECT * FROM deltas WHERE intent_id = ?1 ORDER BY timestamp DESC",
-        )?;
+        let mut stmt = self
+            .conn
+            .prepare("SELECT * FROM deltas WHERE intent_id = ?1 ORDER BY timestamp DESC")?;
 
-        let rows = stmt.query_map([intent_id.to_string()], |row| deserialize_delta(row))?;
+        let rows = stmt.query_map([intent_id.to_string()], deserialize_delta)?;
 
         for row in rows {
             deltas.push(row??);
@@ -273,9 +273,7 @@ fn serialize_status(status: &IntentStatus) -> (String, Option<String>) {
         IntentStatus::InProgress => ("InProgress".to_string(), None),
         IntentStatus::PendingValidation => ("PendingValidation".to_string(), None),
         IntentStatus::Validated => ("Validated".to_string(), None),
-        IntentStatus::Committed { git_sha } => {
-            ("Committed".to_string(), Some(git_sha.clone()))
-        }
+        IntentStatus::Committed { git_sha } => ("Committed".to_string(), Some(git_sha.clone())),
         IntentStatus::Rejected { violations } => (
             "Rejected".to_string(),
             Some(serde_json::to_string(violations).unwrap_or_default()),

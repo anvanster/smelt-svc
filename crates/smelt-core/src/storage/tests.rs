@@ -139,7 +139,9 @@ fn test_list_intents_with_status_filter() {
     intent2.status = IntentStatus::Draft;
     storage.store_intent(&intent2).unwrap();
 
-    let in_progress = storage.list_intents(Some(IntentStatus::InProgress)).unwrap();
+    let in_progress = storage
+        .list_intents(Some(IntentStatus::InProgress))
+        .unwrap();
     assert_eq!(in_progress.len(), 1);
 
     let drafts = storage.list_intents(Some(IntentStatus::Draft)).unwrap();

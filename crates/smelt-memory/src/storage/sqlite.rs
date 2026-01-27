@@ -1,7 +1,7 @@
 //! SQLite storage for episode metadata
 
 use crate::error::{MemoryError, MemoryResult};
-use crate::types::{Episode, EpisodeOutcome, ErrorResolution, Feedback};
+use crate::types::{Episode, EpisodeOutcome, Feedback};
 use chrono::{DateTime, Utc};
 use rusqlite::{params, Connection, OptionalExtension};
 use std::path::Path;
@@ -36,9 +36,10 @@ impl EpisodeStorage {
 
     /// Initialize the database schema
     fn init_schema(&self) -> MemoryResult<()> {
-        let conn = self.conn.lock().map_err(|e| {
-            MemoryError::Storage(format!("Failed to acquire lock: {}", e))
-        })?;
+        let conn = self
+            .conn
+            .lock()
+            .map_err(|e| MemoryError::Storage(format!("Failed to acquire lock: {}", e)))?;
 
         conn.execute_batch(
             r#"
@@ -80,9 +81,10 @@ impl EpisodeStorage {
 
     /// Store an episode
     pub fn store_episode(&self, episode: &Episode) -> MemoryResult<()> {
-        let conn = self.conn.lock().map_err(|e| {
-            MemoryError::Storage(format!("Failed to acquire lock: {}", e))
-        })?;
+        let conn = self
+            .conn
+            .lock()
+            .map_err(|e| MemoryError::Storage(format!("Failed to acquire lock: {}", e)))?;
 
         conn.execute(
             r#"
@@ -116,9 +118,10 @@ impl EpisodeStorage {
 
     /// Get an episode by ID
     pub fn get_episode(&self, id: Uuid) -> MemoryResult<Option<Episode>> {
-        let conn = self.conn.lock().map_err(|e| {
-            MemoryError::Storage(format!("Failed to acquire lock: {}", e))
-        })?;
+        let conn = self
+            .conn
+            .lock()
+            .map_err(|e| MemoryError::Storage(format!("Failed to acquire lock: {}", e)))?;
 
         let mut stmt = conn.prepare(
             r#"
@@ -141,9 +144,10 @@ impl EpisodeStorage {
 
     /// List all episodes, optionally filtered by project
     pub fn list_episodes(&self, project: Option<&str>) -> MemoryResult<Vec<Episode>> {
-        let conn = self.conn.lock().map_err(|e| {
-            MemoryError::Storage(format!("Failed to acquire lock: {}", e))
-        })?;
+        let conn = self
+            .conn
+            .lock()
+            .map_err(|e| MemoryError::Storage(format!("Failed to acquire lock: {}", e)))?;
 
         let mut episodes = Vec::new();
 
@@ -185,9 +189,10 @@ impl EpisodeStorage {
 
     /// Update episode utility score
     pub fn update_utility(&self, id: Uuid, utility: f64) -> MemoryResult<()> {
-        let conn = self.conn.lock().map_err(|e| {
-            MemoryError::Storage(format!("Failed to acquire lock: {}", e))
-        })?;
+        let conn = self
+            .conn
+            .lock()
+            .map_err(|e| MemoryError::Storage(format!("Failed to acquire lock: {}", e)))?;
 
         conn.execute(
             "UPDATE episodes SET utility = ?1 WHERE id = ?2",
@@ -199,9 +204,10 @@ impl EpisodeStorage {
 
     /// Record feedback for an episode
     pub fn record_feedback(&self, episode_id: Uuid, helpful: bool) -> MemoryResult<()> {
-        let conn = self.conn.lock().map_err(|e| {
-            MemoryError::Storage(format!("Failed to acquire lock: {}", e))
-        })?;
+        let conn = self
+            .conn
+            .lock()
+            .map_err(|e| MemoryError::Storage(format!("Failed to acquire lock: {}", e)))?;
 
         // Insert feedback record
         conn.execute(
@@ -239,13 +245,13 @@ impl EpisodeStorage {
 
     /// Get all feedback for an episode
     pub fn get_feedback(&self, episode_id: Uuid) -> MemoryResult<Vec<Feedback>> {
-        let conn = self.conn.lock().map_err(|e| {
-            MemoryError::Storage(format!("Failed to acquire lock: {}", e))
-        })?;
+        let conn = self
+            .conn
+            .lock()
+            .map_err(|e| MemoryError::Storage(format!("Failed to acquire lock: {}", e)))?;
 
-        let mut stmt = conn.prepare(
-            "SELECT episode_id, timestamp, helpful FROM feedback WHERE episode_id = ?1",
-        )?;
+        let mut stmt = conn
+            .prepare("SELECT episode_id, timestamp, helpful FROM feedback WHERE episode_id = ?1")?;
 
         let mut feedback = Vec::new();
         let rows = stmt.query_map([episode_id.to_string()], |row| {
@@ -271,9 +277,10 @@ impl EpisodeStorage {
 
     /// Get episode IDs for utility propagation
     pub fn get_all_episode_ids(&self) -> MemoryResult<Vec<Uuid>> {
-        let conn = self.conn.lock().map_err(|e| {
-            MemoryError::Storage(format!("Failed to acquire lock: {}", e))
-        })?;
+        let conn = self
+            .conn
+            .lock()
+            .map_err(|e| MemoryError::Storage(format!("Failed to acquire lock: {}", e)))?;
 
         let mut stmt = conn.prepare("SELECT id FROM episodes")?;
         let mut ids = Vec::new();
@@ -292,9 +299,10 @@ impl EpisodeStorage {
 
     /// Get statistics about the memory
     pub fn get_stats(&self, project: Option<&str>) -> MemoryResult<MemoryStats> {
-        let conn = self.conn.lock().map_err(|e| {
-            MemoryError::Storage(format!("Failed to acquire lock: {}", e))
-        })?;
+        let conn = self
+            .conn
+            .lock()
+            .map_err(|e| MemoryError::Storage(format!("Failed to acquire lock: {}", e)))?;
 
         let (total_episodes, total_feedback, avg_utility) = if let Some(proj) = project {
             let mut stmt = conn.prepare(
@@ -311,9 +319,8 @@ impl EpisodeStorage {
                 ))
             })?
         } else {
-            let mut stmt = conn.prepare(
-                "SELECT COUNT(*), SUM(feedback_count), AVG(utility) FROM episodes",
-            )?;
+            let mut stmt =
+                conn.prepare("SELECT COUNT(*), SUM(feedback_count), AVG(utility) FROM episodes")?;
             stmt.query_row([], |row| {
                 Ok((
                     row.get::<_, i64>(0)? as usize,
@@ -422,10 +429,18 @@ mod tests {
     fn test_list_episodes() {
         let storage = EpisodeStorage::in_memory().unwrap();
 
-        let ep1 = Episode::new("Episode 1".to_string(), "feature".to_string(), EpisodeOutcome::Success)
-            .with_project("proj-a".to_string());
-        let ep2 = Episode::new("Episode 2".to_string(), "bugfix".to_string(), EpisodeOutcome::Success)
-            .with_project("proj-b".to_string());
+        let ep1 = Episode::new(
+            "Episode 1".to_string(),
+            "feature".to_string(),
+            EpisodeOutcome::Success,
+        )
+        .with_project("proj-a".to_string());
+        let ep2 = Episode::new(
+            "Episode 2".to_string(),
+            "bugfix".to_string(),
+            EpisodeOutcome::Success,
+        )
+        .with_project("proj-b".to_string());
 
         storage.store_episode(&ep1).unwrap();
         storage.store_episode(&ep2).unwrap();
@@ -485,8 +500,16 @@ mod tests {
     fn test_stats() {
         let storage = EpisodeStorage::in_memory().unwrap();
 
-        let ep1 = Episode::new("Ep1".to_string(), "test".to_string(), EpisodeOutcome::Success);
-        let ep2 = Episode::new("Ep2".to_string(), "test".to_string(), EpisodeOutcome::Partial);
+        let ep1 = Episode::new(
+            "Ep1".to_string(),
+            "test".to_string(),
+            EpisodeOutcome::Success,
+        );
+        let ep2 = Episode::new(
+            "Ep2".to_string(),
+            "test".to_string(),
+            EpisodeOutcome::Partial,
+        );
 
         storage.store_episode(&ep1).unwrap();
         storage.store_episode(&ep2).unwrap();

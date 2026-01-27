@@ -1,13 +1,13 @@
 //! Benchmarks for smelt-core operations
 
-use criterion::{black_box, criterion_group, criterion_main, Criterion, BenchmarkId};
-use smelt_core::{
-    Author, AuthorType, ContextLinks, IntentRecord, IntentStatus, SemanticDelta,
-    SmeltGraph, SqliteStorage, ImpactSummary,
-};
 use chrono::Utc;
-use uuid::Uuid;
+use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
+use smelt_core::{
+    Author, AuthorType, ContextLinks, ImpactSummary, IntentRecord, IntentStatus, SemanticDelta,
+    SmeltGraph, SqliteStorage,
+};
 use tempfile::TempDir;
+use uuid::Uuid;
 
 fn create_test_intent() -> IntentRecord {
     IntentRecord {
@@ -95,9 +95,7 @@ fn bench_storage_operations(c: &mut Criterion) {
             storage.store_intent(&intent).unwrap();
         }
 
-        b.iter(|| {
-            storage.list_intents(black_box(None)).unwrap()
-        });
+        b.iter(|| storage.list_intents(black_box(None)).unwrap());
     });
 
     // Benchmark delta storage
@@ -130,9 +128,7 @@ fn bench_graph_operations(c: &mut Criterion) {
         // Initialize graph first
         let _ = SmeltGraph::open(&graph_path).unwrap();
 
-        b.iter(|| {
-            SmeltGraph::open(black_box(&graph_path)).unwrap()
-        });
+        b.iter(|| SmeltGraph::open(black_box(&graph_path)).unwrap());
     });
 
     // Benchmark snapshot capture
@@ -143,9 +139,7 @@ fn bench_graph_operations(c: &mut Criterion) {
 
         let graph = SmeltGraph::open(&graph_path).unwrap();
 
-        b.iter(|| {
-            graph.snapshot()
-        });
+        b.iter(|| graph.snapshot());
     });
 
     // Benchmark snapshot for intent
@@ -169,25 +163,19 @@ fn bench_intent_scaling(c: &mut Criterion) {
     let mut group = c.benchmark_group("scaling");
 
     for size in [10, 100, 1000].iter() {
-        group.bench_with_input(
-            BenchmarkId::new("list_intents", size),
-            size,
-            |b, &size| {
-                let temp_dir = TempDir::new().unwrap();
-                let db_path = temp_dir.path().join("bench.db");
-                let storage = SqliteStorage::open(&db_path).unwrap();
+        group.bench_with_input(BenchmarkId::new("list_intents", size), size, |b, &size| {
+            let temp_dir = TempDir::new().unwrap();
+            let db_path = temp_dir.path().join("bench.db");
+            let storage = SqliteStorage::open(&db_path).unwrap();
 
-                // Pre-populate
-                for _ in 0..size {
-                    let intent = create_test_intent();
-                    storage.store_intent(&intent).unwrap();
-                }
+            // Pre-populate
+            for _ in 0..size {
+                let intent = create_test_intent();
+                storage.store_intent(&intent).unwrap();
+            }
 
-                b.iter(|| {
-                    storage.list_intents(None).unwrap()
-                });
-            },
-        );
+            b.iter(|| storage.list_intents(None).unwrap());
+        });
     }
 
     group.finish();

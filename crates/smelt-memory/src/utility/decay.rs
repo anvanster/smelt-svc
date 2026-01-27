@@ -32,15 +32,12 @@ impl DecayParams {
         // 0.5 = (1 - rate)^days
         // rate = 1 - 0.5^(1/days)
         let rate = 1.0 - 0.5_f64.powf(1.0 / days);
-        Self {
-            rate,
-            floor: 0.1,
-        }
+        Self { rate, floor: 0.1 }
     }
 
     /// Set the minimum utility floor
     pub fn with_floor(mut self, floor: f64) -> Self {
-        self.floor = floor.max(0.0).min(1.0);
+        self.floor = floor.clamp(0.0, 1.0);
         self
     }
 }
@@ -76,6 +73,7 @@ pub fn apply_decay(
 }
 
 /// Calculate the decay factor for a given age
+#[allow(dead_code)]
 pub fn decay_factor(days: f64, params: &DecayParams) -> f64 {
     if days <= 0.0 {
         1.0

@@ -2,7 +2,7 @@
 
 use anyhow::{Context, Result};
 use smelt_core::{Git2Interface, GitInterface, SmeltError, SmeltGraph, SqliteStorage};
-use std::path::PathBuf;
+use std::path::Path;
 
 pub async fn run(wait_for_indexing: bool) -> Result<()> {
     let cwd = std::env::current_dir().context("Failed to get current directory")?;
@@ -94,7 +94,7 @@ pub async fn run(wait_for_indexing: bool) -> Result<()> {
     Ok(())
 }
 
-fn install_git_hooks(repo_root: &PathBuf) -> Result<()> {
+fn install_git_hooks(repo_root: &Path) -> Result<()> {
     let hooks_dir = repo_root.join(".git/hooks");
     std::fs::create_dir_all(&hooks_dir).context("Failed to create hooks directory")?;
 
@@ -124,7 +124,7 @@ fi
     Ok(())
 }
 
-fn create_default_config(smelt_dir: &PathBuf) -> Result<()> {
+fn create_default_config(smelt_dir: &Path) -> Result<()> {
     let config = r#"# Smelt Configuration
 # See https://github.com/anvanster/smelt-svc for documentation
 
@@ -143,7 +143,6 @@ auto_stage = true
 strict = false
 "#;
 
-    std::fs::write(smelt_dir.join("config.toml"), config)
-        .context("Failed to write config file")?;
+    std::fs::write(smelt_dir.join("config.toml"), config).context("Failed to write config file")?;
     Ok(())
 }

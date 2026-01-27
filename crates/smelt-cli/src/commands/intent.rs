@@ -3,8 +3,8 @@
 use anyhow::Result;
 use chrono::Utc;
 use smelt_core::{
-    Author, AuthorType, ContextLinks, Git2Interface, GitInterface, IntentRecord,
-    IntentStatus, SmeltGraph, SqliteStorage,
+    Author, AuthorType, ContextLinks, Git2Interface, GitInterface, IntentRecord, IntentStatus,
+    SmeltGraph, SqliteStorage,
 };
 use uuid::Uuid;
 
@@ -179,7 +179,9 @@ fn format_status(status: &IntentStatus) -> String {
         IntentStatus::InProgress => "In Progress".to_string(),
         IntentStatus::PendingValidation => "Pending Validation".to_string(),
         IntentStatus::Validated => "Validated".to_string(),
-        IntentStatus::Committed { git_sha } => format!("Committed ({})", &git_sha[..8.min(git_sha.len())]),
+        IntentStatus::Committed { git_sha } => {
+            format!("Committed ({})", &git_sha[..8.min(git_sha.len())])
+        }
         IntentStatus::Rejected { violations } => {
             format!("Rejected ({} violations)", violations.len())
         }

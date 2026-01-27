@@ -129,11 +129,7 @@ impl CrucibleAdapter {
     }
 
     /// Convert a Crucible ValidationIssue to our Violation
-    fn convert_issue(
-        &self,
-        issue: &ValidationIssue,
-        severity: ValidationSeverity,
-    ) -> Violation {
+    fn convert_issue(&self, issue: &ValidationIssue, severity: ValidationSeverity) -> Violation {
         let mut message = issue.message.clone();
 
         // Add found/expected context if available
@@ -156,11 +152,7 @@ impl ValidationRule for CrucibleAdapter {
         "crucible"
     }
 
-    fn validate(
-        &self,
-        _delta: &SemanticDelta,
-        _intent: Option<&IntentRecord>,
-    ) -> Vec<Violation> {
+    fn validate(&self, _delta: &SemanticDelta, _intent: Option<&IntentRecord>) -> Vec<Violation> {
         if !self.enabled {
             return Vec::new();
         }

@@ -167,11 +167,9 @@ fn check_database(smelt_dir: &Path) -> CheckResult {
                     "database",
                     format!("Database OK ({} intents)", intents.len()),
                 ),
-                Err(e) => CheckResult::fail(
-                    "database",
-                    format!("Database query failed: {}", e),
-                    false,
-                ),
+                Err(e) => {
+                    CheckResult::fail("database", format!("Database query failed: {}", e), false)
+                }
             }
         }
         Err(e) => CheckResult::fail("database", format!("Cannot open database: {}", e), false),
@@ -318,10 +316,10 @@ async fn attempt_repair(check_name: &str, smelt_dir: &Path) -> Option<bool> {
                     let name = entry.file_name();
                     let name_str = name.to_string_lossy();
                     for pattern in &orphaned_patterns {
-                        if name_str.ends_with(pattern) {
-                            if fs::remove_file(entry.path()).is_ok() {
-                                removed += 1;
-                            }
+                        if name_str.ends_with(pattern)
+                            && fs::remove_file(entry.path()).is_ok()
+                        {
+                            removed += 1;
                         }
                     }
                 }
@@ -355,11 +353,7 @@ pub async fn verbose() -> Result<()> {
             for entry in entries.flatten() {
                 let metadata = entry.metadata();
                 let size = metadata.map(|m| m.len()).unwrap_or(0);
-                let file_type = if entry.path().is_dir() {
-                    "dir"
-                } else {
-                    "file"
-                };
+                let file_type = if entry.path().is_dir() { "dir" } else { "file" };
                 println!(
                     "  {} ({}, {} bytes)",
                     entry.file_name().to_string_lossy(),

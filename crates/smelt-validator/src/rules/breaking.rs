@@ -64,7 +64,8 @@ impl BreakingChangeChecker {
                         ),
                         location: Some(file.clone()),
                         suggestion: Some(
-                            "Add overload or default parameter to maintain backward compatibility".to_string(),
+                            "Add overload or default parameter to maintain backward compatibility"
+                                .to_string(),
                         ),
                     })
                 } else {
@@ -88,7 +89,8 @@ impl BreakingChangeChecker {
                         message: format!("Public type '{}' was removed", name),
                         location: Some(file.clone()),
                         suggestion: Some(
-                            "Mark as deprecated instead of removing, or provide migration path".to_string(),
+                            "Mark as deprecated instead of removing, or provide migration path"
+                                .to_string(),
                         ),
                     })
                 } else {
@@ -173,11 +175,7 @@ impl ValidationRule for BreakingChangeChecker {
         "breaking-changes"
     }
 
-    fn validate(
-        &self,
-        delta: &SemanticDelta,
-        _intent: Option<&IntentRecord>,
-    ) -> Vec<Violation> {
+    fn validate(&self, delta: &SemanticDelta, _intent: Option<&IntentRecord>) -> Vec<Violation> {
         if !self.config.check_breaking_changes {
             return Vec::new();
         }
@@ -255,8 +253,10 @@ mod tests {
 
     #[test]
     fn test_disabled_check() {
-        let mut config = SemanticConfig::default();
-        config.check_breaking_changes = false;
+        let config = SemanticConfig {
+            check_breaking_changes: false,
+            ..Default::default()
+        };
 
         let checker = BreakingChangeChecker::new(config);
 

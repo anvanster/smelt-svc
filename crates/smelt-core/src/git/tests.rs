@@ -164,7 +164,7 @@ fn test_stage_files() {
     let new_file = dir.path().join("staged.txt");
     std::fs::write(&new_file, "staged content").unwrap();
 
-    git.stage_files(&[new_file.clone()]).unwrap();
+    git.stage_files(std::slice::from_ref(&new_file)).unwrap();
 
     let staged = git.staged_files().unwrap();
     assert_eq!(staged.len(), 1);
@@ -208,5 +208,8 @@ fn test_repo_root() {
     let git = Git2Interface::open(&dir.path().to_path_buf()).unwrap();
 
     let root = git.repo_root();
-    assert_eq!(root.canonicalize().unwrap(), dir.path().canonicalize().unwrap());
+    assert_eq!(
+        root.canonicalize().unwrap(),
+        dir.path().canonicalize().unwrap()
+    );
 }

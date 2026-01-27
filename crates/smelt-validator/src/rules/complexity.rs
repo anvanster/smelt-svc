@@ -22,11 +22,7 @@ impl ValidationRule for ComplexityChecker {
         "complexity"
     }
 
-    fn validate(
-        &self,
-        delta: &SemanticDelta,
-        _intent: Option<&IntentRecord>,
-    ) -> Vec<Violation> {
+    fn validate(&self, delta: &SemanticDelta, _intent: Option<&IntentRecord>) -> Vec<Violation> {
         let mut violations = Vec::new();
 
         // Check overall complexity increase
@@ -61,7 +57,7 @@ impl ValidationRule for ComplexityChecker {
                 complexity_delta: func_delta,
             } = change
             {
-                if *func_delta > self.config.max_complexity_increase as i32 {
+                if *func_delta > self.config.max_complexity_increase {
                     violations.push(Violation {
                         rule: "function-complexity".to_string(),
                         severity: if self.config.complexity_error {

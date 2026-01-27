@@ -1,7 +1,10 @@
 //! Smelt API Server - REST API for AI agent integration
 
 use anyhow::Result;
-use axum::{routing::{get, post}, Router};
+use axum::{
+    routing::{get, post},
+    Router,
+};
 use std::net::SocketAddr;
 use std::path::PathBuf;
 use tower_http::cors::{Any, CorsLayer};

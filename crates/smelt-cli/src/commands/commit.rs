@@ -169,7 +169,10 @@ pub async fn run(
             }
 
             if outcome.warning_count > 0 {
-                println!("    Validation: passed with {} warning(s)", outcome.warning_count);
+                println!(
+                    "    Validation: passed with {} warning(s)",
+                    outcome.warning_count
+                );
             } else {
                 println!("    Validation: passed");
             }

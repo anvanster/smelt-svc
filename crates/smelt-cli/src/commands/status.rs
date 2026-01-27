@@ -23,11 +23,7 @@ pub async fn run(full: bool) -> Result<()> {
     let intents = storage.list_intents(Some(IntentStatus::InProgress))?;
 
     if let Some(intent) = intents.first() {
-        println!(
-            "Intent: {} ({})",
-            &intent.id.to_string()[..8],
-            intent.goal
-        );
+        println!("Intent: {} ({})", &intent.id.to_string()[..8], intent.goal);
         println!("Status: In Progress");
         println!();
 
@@ -107,7 +103,12 @@ pub async fn run(full: bool) -> Result<()> {
                     IntentStatus::Rejected { .. } => "rejected",
                     _ => "other",
                 };
-                println!("  {} - {} ({})", &intent.id.to_string()[..8], intent.goal, status);
+                println!(
+                    "  {} - {} ({})",
+                    &intent.id.to_string()[..8],
+                    intent.goal,
+                    status
+                );
             }
         }
     }

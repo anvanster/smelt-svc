@@ -51,7 +51,10 @@ impl GitInterface for Git2Interface {
         } else {
             // Detached HEAD
             let commit = head.peel_to_commit()?;
-            Ok(format!("HEAD detached at {}", &commit.id().to_string()[..8]))
+            Ok(format!(
+                "HEAD detached at {}",
+                &commit.id().to_string()[..8]
+            ))
         }
     }
 
@@ -127,7 +130,10 @@ impl GitInterface for Git2Interface {
         let mut index = self.repo.index()?;
 
         // Canonicalize repo root for proper comparison
-        let canonical_root = self.root.canonicalize().unwrap_or_else(|_| self.root.clone());
+        let canonical_root = self
+            .root
+            .canonicalize()
+            .unwrap_or_else(|_| self.root.clone());
 
         for file in files {
             // Canonicalize the file path if it exists
@@ -274,7 +280,9 @@ impl GitInterface for Git2Interface {
         let to_tree = to_commit.tree()?;
 
         let mut opts = DiffOptions::new();
-        let diff = self.repo.diff_tree_to_tree(Some(&from_tree), Some(&to_tree), Some(&mut opts))?;
+        let diff =
+            self.repo
+                .diff_tree_to_tree(Some(&from_tree), Some(&to_tree), Some(&mut opts))?;
 
         let mut files = Vec::new();
         diff.foreach(
@@ -307,11 +315,9 @@ impl Git2Interface {
         };
 
         let mut opts = DiffOptions::new();
-        let diff = self.repo.diff_tree_to_tree(
-            parent_tree.as_ref(),
-            Some(&tree),
-            Some(&mut opts),
-        )?;
+        let diff =
+            self.repo
+                .diff_tree_to_tree(parent_tree.as_ref(), Some(&tree), Some(&mut opts))?;
 
         let mut files = Vec::new();
         diff.foreach(

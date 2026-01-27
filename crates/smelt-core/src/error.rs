@@ -128,9 +128,9 @@ impl SmeltError {
             SmeltError::NotAGitRepository => {
                 Some("Initialize a git repository with 'git init' first.")
             }
-            SmeltError::GitAuthorNotConfigured => {
-                Some("Configure git author with 'git config user.name' and 'git config user.email'.")
-            }
+            SmeltError::GitAuthorNotConfigured => Some(
+                "Configure git author with 'git config user.name' and 'git config user.email'.",
+            ),
             SmeltError::EmptyRepository => Some("Create at least one commit before using Smelt."),
             SmeltError::UncommittedChanges => {
                 Some("Commit or stash your changes before proceeding.")

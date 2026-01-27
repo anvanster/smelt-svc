@@ -1,10 +1,12 @@
 //! Main SmeltMemory implementation
 
 use crate::embedder::{Embedder, FastEmbedder, DEFAULT_DIMENSION};
-use crate::error::{MemoryError, MemoryResult};
+use crate::error::MemoryResult;
 use crate::storage::{EpisodeStorage, MemoryStats, VectorStore};
 use crate::types::{Episode, EpisodeOutcome, ErrorResolution, RankedEpisode};
-use crate::utility::{bellman_propagate, temporal_credit_assignment, PropagationResult, UtilityRanker};
+use crate::utility::{
+    bellman_propagate, temporal_credit_assignment, PropagationResult, UtilityRanker,
+};
 use smelt_core::IntentRecord;
 use std::path::Path;
 use std::sync::Arc;
@@ -41,7 +43,10 @@ impl SmeltMemory {
             Err(e) => {
                 tracing::warn!("Failed to initialize embedder: {}", e);
                 // Use a dummy embedder that returns zeros
-                (Arc::new(DummyEmbedder::new(DEFAULT_DIMENSION)), DEFAULT_DIMENSION)
+                (
+                    Arc::new(DummyEmbedder::new(DEFAULT_DIMENSION)),
+                    DEFAULT_DIMENSION,
+                )
             }
         };
 
@@ -176,8 +181,9 @@ impl SmeltMemory {
 
         // Update utility
         if let Some(episode) = self.storage.get_episode(episode_id)? {
-            let new_utility =
-                self.ranker.update_utility_from_feedback(&episode, helpful, 0.1);
+            let new_utility = self
+                .ranker
+                .update_utility_from_feedback(&episode, helpful, 0.1);
             self.storage.update_utility(episode_id, new_utility)?;
         }
 
@@ -200,9 +206,9 @@ impl SmeltMemory {
         let (new_utilities, result) = bellman_propagate(
             &episodes,
             &self.vectors,
-            0.1,  // learning_rate
-            0.9,  // discount
-            0.5,  // similarity_threshold
+            0.1, // learning_rate
+            0.9, // discount
+            0.5, // similarity_threshold
         );
 
         // Apply temporal credit if requested
@@ -332,8 +338,16 @@ mod tests {
         let mut memory = SmeltMemory::in_memory().unwrap();
 
         // Create some episodes
-        let ep1 = Episode::new("Auth fix".to_string(), "bugfix".to_string(), EpisodeOutcome::Success);
-        let ep2 = Episode::new("Auth test".to_string(), "test".to_string(), EpisodeOutcome::Partial);
+        let ep1 = Episode::new(
+            "Auth fix".to_string(),
+            "bugfix".to_string(),
+            EpisodeOutcome::Success,
+        );
+        let ep2 = Episode::new(
+            "Auth test".to_string(),
+            "test".to_string(),
+            EpisodeOutcome::Partial,
+        );
 
         memory.capture(ep1).unwrap();
         memory.capture(ep2).unwrap();
@@ -348,10 +362,18 @@ mod tests {
     fn test_project_filter() {
         let mut memory = SmeltMemory::in_memory().unwrap();
 
-        let ep1 = Episode::new("Project A work".to_string(), "feature".to_string(), EpisodeOutcome::Success)
-            .with_project("project-a".to_string());
-        let ep2 = Episode::new("Project B work".to_string(), "feature".to_string(), EpisodeOutcome::Success)
-            .with_project("project-b".to_string());
+        let ep1 = Episode::new(
+            "Project A work".to_string(),
+            "feature".to_string(),
+            EpisodeOutcome::Success,
+        )
+        .with_project("project-a".to_string());
+        let ep2 = Episode::new(
+            "Project B work".to_string(),
+            "feature".to_string(),
+            EpisodeOutcome::Success,
+        )
+        .with_project("project-b".to_string());
 
         memory.capture(ep1).unwrap();
         memory.capture(ep2).unwrap();
@@ -361,7 +383,7 @@ mod tests {
         assert_eq!(all.len(), 2);
 
         // With project filter
-        let memory_a = memory.with_project("project-a".to_string());
+        let _memory_a = memory.with_project("project-a".to_string());
         // Note: list_episodes would now filter by project
     }
 
@@ -369,8 +391,16 @@ mod tests {
     fn test_stats() {
         let mut memory = SmeltMemory::in_memory().unwrap();
 
-        let ep1 = Episode::new("Ep1".to_string(), "test".to_string(), EpisodeOutcome::Success);
-        let ep2 = Episode::new("Ep2".to_string(), "test".to_string(), EpisodeOutcome::Success);
+        let ep1 = Episode::new(
+            "Ep1".to_string(),
+            "test".to_string(),
+            EpisodeOutcome::Success,
+        );
+        let ep2 = Episode::new(
+            "Ep2".to_string(),
+            "test".to_string(),
+            EpisodeOutcome::Success,
+        );
 
         memory.capture(ep1).unwrap();
         memory.capture(ep2).unwrap();

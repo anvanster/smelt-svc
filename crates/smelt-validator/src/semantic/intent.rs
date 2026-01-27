@@ -65,9 +65,10 @@ impl IntentValidator {
         let mut violations = Vec::new();
 
         // Check if intent explicitly allows breaking changes
-        let breaking_allowed = intent.constraints.iter().any(|c| {
-            c.name == "allow_breaking_changes" && c.value.to_lowercase() == "true"
-        });
+        let breaking_allowed = intent
+            .constraints
+            .iter()
+            .any(|c| c.name == "allow_breaking_changes" && c.value.to_lowercase() == "true");
 
         if delta.impact_summary.breaking_changes > 0 && !breaking_allowed {
             violations.push(Violation {
@@ -94,11 +95,7 @@ impl ValidationRule for IntentValidator {
         "intent"
     }
 
-    fn validate(
-        &self,
-        delta: &SemanticDelta,
-        intent: Option<&IntentRecord>,
-    ) -> Vec<Violation> {
+    fn validate(&self, delta: &SemanticDelta, intent: Option<&IntentRecord>) -> Vec<Violation> {
         let Some(intent) = intent else {
             return Vec::new();
         };
@@ -119,9 +116,7 @@ impl ValidationRule for IntentValidator {
 mod tests {
     use super::*;
     use chrono::Utc;
-    use smelt_core::{
-        Author, AuthorType, Constraint, ContextLinks, ImpactSummary, IntentStatus,
-    };
+    use smelt_core::{Author, AuthorType, Constraint, ContextLinks, ImpactSummary, IntentStatus};
     use uuid::Uuid;
 
     fn make_intent(rationale: Option<String>, constraints: Vec<Constraint>) -> IntentRecord {
@@ -160,9 +155,11 @@ mod tests {
 
     #[test]
     fn test_large_change_with_rationale_ok() {
-        let mut config = IntentConfig::default();
-        config.require_rationale_for_large_changes = true;
-        config.large_change_threshold = 5;
+        let config = IntentConfig {
+            require_rationale_for_large_changes: true,
+            large_change_threshold: 5,
+            ..Default::default()
+        };
 
         let validator = IntentValidator::new(config);
         let intent = make_intent(Some("Major refactoring".to_string()), vec![]);
@@ -174,9 +171,11 @@ mod tests {
 
     #[test]
     fn test_large_change_without_rationale() {
-        let mut config = IntentConfig::default();
-        config.require_rationale_for_large_changes = true;
-        config.large_change_threshold = 5;
+        let config = IntentConfig {
+            require_rationale_for_large_changes: true,
+            large_change_threshold: 5,
+            ..Default::default()
+        };
 
         let validator = IntentValidator::new(config);
         let intent = make_intent(None, vec![]);

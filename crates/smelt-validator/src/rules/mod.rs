@@ -17,9 +17,5 @@ pub trait ValidationRule: Send + Sync {
     fn name(&self) -> &'static str;
 
     /// Validate a semantic delta
-    fn validate(
-        &self,
-        delta: &SemanticDelta,
-        intent: Option<&IntentRecord>,
-    ) -> Vec<Violation>;
+    fn validate(&self, delta: &SemanticDelta, intent: Option<&IntentRecord>) -> Vec<Violation>;
 }

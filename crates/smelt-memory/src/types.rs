@@ -155,7 +155,7 @@ impl Episode {
             let file_names: Vec<&str> = self
                 .files_modified
                 .iter()
-                .filter_map(|f| f.split('/').last())
+                .filter_map(|f| f.split('/').next_back())
                 .collect();
             parts.push(format!("Files: {}", file_names.join(", ")));
         }

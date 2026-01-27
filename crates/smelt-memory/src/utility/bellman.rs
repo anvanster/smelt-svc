@@ -88,7 +88,7 @@ pub fn bellman_propagate(
             let update = learning_rate * (target - episode.utility);
 
             // Clamp to valid range
-            (episode.utility + update).max(0.0).min(1.0)
+            (episode.utility + update).clamp(0.0, 1.0)
         } else {
             episode.utility
         };

@@ -161,11 +161,7 @@ pub async fn list(backup_path: PathBuf) -> Result<()> {
     }
 
     println!();
-    println!(
-        "Total: {} files, {} KB",
-        file_count,
-        total_size / 1024
-    );
+    println!("Total: {} files, {} KB", file_count, total_size / 1024);
 
     Ok(())
 }

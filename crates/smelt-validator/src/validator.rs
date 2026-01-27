@@ -95,17 +95,13 @@ pub struct SmeltValidator {
 impl SmeltValidator {
     /// Create a new validator with the given configuration
     pub fn new(config: ValidationConfig) -> Self {
-        let mut rules: Vec<Box<dyn ValidationRule>> = Vec::new();
-
         // Add semantic delta validators
-        rules.push(Box::new(BreakingChangeChecker::new(
-            config.semantic.clone(),
-        )));
-        rules.push(Box::new(VisibilityChecker::new(config.semantic.clone())));
-        rules.push(Box::new(ComplexityChecker::new(
-            config.semantic.complexity.clone(),
-        )));
-        rules.push(Box::new(IntentValidator::new(config.intent.clone())));
+        let rules: Vec<Box<dyn ValidationRule>> = vec![
+            Box::new(BreakingChangeChecker::new(config.semantic.clone())),
+            Box::new(VisibilityChecker::new(config.semantic.clone())),
+            Box::new(ComplexityChecker::new(config.semantic.complexity.clone())),
+            Box::new(IntentValidator::new(config.intent.clone())),
+        ];
 
         Self { config, rules }
     }
@@ -183,11 +179,7 @@ impl SmeltValidator {
     }
 
     /// Validate a delta and return a simple pass/fail result
-    pub fn validate_simple(
-        &self,
-        delta: &SemanticDelta,
-        intent: Option<&IntentRecord>,
-    ) -> bool {
+    pub fn validate_simple(&self, delta: &SemanticDelta, intent: Option<&IntentRecord>) -> bool {
         self.validate(delta, intent).passed
     }
 
@@ -207,7 +199,7 @@ impl Default for SmeltValidator {
 mod tests {
     use super::*;
     use chrono::Utc;
-    use smelt_core::{ImpactSummary, SemanticChange, Visibility};
+    use smelt_core::{ImpactSummary, SemanticChange};
     use uuid::Uuid;
 
     fn make_delta(changes: Vec<SemanticChange>) -> SemanticDelta {

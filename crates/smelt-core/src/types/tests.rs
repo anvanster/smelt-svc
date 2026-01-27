@@ -1,8 +1,6 @@
 //! Tests for core types
 
 use super::*;
-use chrono::Utc;
-use uuid::Uuid;
 
 mod intent_tests {
     use super::*;
@@ -18,10 +16,7 @@ mod intent_tests {
             git_sha: "abc".to_string()
         }
         .is_terminal());
-        assert!(IntentStatus::Rejected {
-            violations: vec![]
-        }
-        .is_terminal());
+        assert!(IntentStatus::Rejected { violations: vec![] }.is_terminal());
         assert!(IntentStatus::Abandoned.is_terminal());
     }
 
@@ -36,10 +31,7 @@ mod intent_tests {
             git_sha: "abc".to_string()
         }
         .is_active());
-        assert!(!IntentStatus::Rejected {
-            violations: vec![]
-        }
-        .is_active());
+        assert!(!IntentStatus::Rejected { violations: vec![] }.is_active());
         assert!(!IntentStatus::Abandoned.is_active());
     }
 
@@ -91,26 +83,32 @@ mod delta_tests {
 
     #[test]
     fn test_impact_summary_risk_score_breaking_changes() {
-        let mut summary = ImpactSummary::default();
-        summary.breaking_changes = 3;
+        let summary = ImpactSummary {
+            breaking_changes: 3,
+            ..Default::default()
+        };
         let score = summary.risk_score();
         assert!(score > 0.8); // 3 * 0.3 = 0.9
     }
 
     #[test]
     fn test_impact_summary_risk_score_capped_at_one() {
-        let mut summary = ImpactSummary::default();
-        summary.breaking_changes = 10;
-        summary.functions_removed = 20;
-        summary.complexity_delta = 100;
+        let summary = ImpactSummary {
+            breaking_changes: 10,
+            functions_removed: 20,
+            complexity_delta: 100,
+            ..Default::default()
+        };
         assert_eq!(summary.risk_score(), 1.0);
     }
 
     #[test]
     fn test_impact_summary_risk_score_removals() {
-        let mut summary = ImpactSummary::default();
-        summary.functions_removed = 2;
-        summary.types_removed = 1;
+        let summary = ImpactSummary {
+            functions_removed: 2,
+            types_removed: 1,
+            ..Default::default()
+        };
         let score = summary.risk_score();
         assert!(score > 0.0);
         assert!(score < 1.0);
@@ -136,7 +134,7 @@ mod delta_tests {
     #[test]
     fn test_semantic_change_variants() {
         // Test that all SemanticChange variants can be constructed
-        let changes = vec![
+        let changes = [
             SemanticChange::FunctionAdded {
                 name: "test".to_string(),
                 file: "test.rs".to_string(),

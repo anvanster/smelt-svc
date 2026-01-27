@@ -66,7 +66,8 @@ fn compute_file_changes(
     let removed = from_files.difference(&to_files).count();
     let modified = from_files.intersection(&to_files).count(); // Simplified - assumes all common files are modified
 
-    impact.files_affected = added + removed + modified.min(to.node_count.saturating_sub(from.node_count));
+    impact.files_affected =
+        added + removed + modified.min(to.node_count.saturating_sub(from.node_count));
 }
 
 /// Compute node-level changes between snapshots
@@ -124,6 +125,7 @@ fn compute_node_changes(
 }
 
 /// Detailed delta computation with full graph access (for future use)
+#[allow(dead_code)]
 pub fn compute_detailed_delta(
     _intent_id: IntentId,
     _from: &GraphSnapshot,

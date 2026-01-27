@@ -24,6 +24,7 @@ pub struct SmeltGraph {
     tracked_files: Vec<String>,
 
     /// Path to graph storage
+    #[allow(dead_code)]
     storage_path: std::path::PathBuf,
 }
 

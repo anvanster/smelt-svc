@@ -89,9 +89,7 @@ impl VisibilityChecker {
                             name, old_visibility, new_visibility
                         ),
                         location: Some(file.clone()),
-                        suggestion: Some(
-                            "Ensure API is ready for public consumption".to_string(),
-                        ),
+                        suggestion: Some("Ensure API is ready for public consumption".to_string()),
                     })
                 } else {
                     None
@@ -108,11 +106,7 @@ impl ValidationRule for VisibilityChecker {
         "visibility"
     }
 
-    fn validate(
-        &self,
-        delta: &SemanticDelta,
-        _intent: Option<&IntentRecord>,
-    ) -> Vec<Violation> {
+    fn validate(&self, delta: &SemanticDelta, _intent: Option<&IntentRecord>) -> Vec<Violation> {
         if !self.config.check_visibility {
             return Vec::new();
         }
@@ -146,8 +140,10 @@ mod tests {
 
     #[test]
     fn test_new_public_function_flagged() {
-        let mut config = SemanticConfig::default();
-        config.review_new_public_api = true;
+        let config = SemanticConfig {
+            review_new_public_api: true,
+            ..Default::default()
+        };
 
         let checker = VisibilityChecker::new(config);
 
@@ -165,8 +161,10 @@ mod tests {
 
     #[test]
     fn test_private_function_ok() {
-        let mut config = SemanticConfig::default();
-        config.review_new_public_api = true;
+        let config = SemanticConfig {
+            review_new_public_api: true,
+            ..Default::default()
+        };
 
         let checker = VisibilityChecker::new(config);
 
@@ -183,8 +181,10 @@ mod tests {
 
     #[test]
     fn test_review_disabled_no_warnings() {
-        let mut config = SemanticConfig::default();
-        config.review_new_public_api = false;
+        let config = SemanticConfig {
+            review_new_public_api: false,
+            ..Default::default()
+        };
 
         let checker = VisibilityChecker::new(config);
 

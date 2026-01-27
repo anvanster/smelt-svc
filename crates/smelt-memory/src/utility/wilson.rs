@@ -37,7 +37,7 @@ pub fn wilson_score(positive: u32, total: u32, confidence: f64) -> f64 {
     let lower_bound = (center - spread) / denominator;
 
     // Clamp to valid range
-    lower_bound.max(0.0).min(1.0)
+    lower_bound.clamp(0.0, 1.0)
 }
 
 /// Calculate Wilson score with default 95% confidence

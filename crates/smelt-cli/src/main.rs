@@ -3,8 +3,8 @@
 use anyhow::Result;
 use clap::{CommandFactory, Parser, Subcommand};
 use clap_complete::{generate, Shell};
-use tracing_subscriber::{fmt, prelude::*, EnvFilter};
 use std::io;
+use tracing_subscriber::{fmt, prelude::*, EnvFilter};
 
 mod commands;
 mod ui;
@@ -303,9 +303,7 @@ async fn main() -> Result<()> {
             show_config,
         } => commands::validate::run(intent, strict, show_config).await,
         Commands::Memory { action } => match action {
-            MemoryAction::Search { query, limit } => {
-                commands::memory::search(query, limit).await
-            }
+            MemoryAction::Search { query, limit } => commands::memory::search(query, limit).await,
             MemoryAction::Feedback {
                 episode_id,
                 helpful,
@@ -315,9 +313,7 @@ async fn main() -> Result<()> {
                 commands::memory::feedback(episode_id, is_helpful).await
             }
             MemoryAction::Stats => commands::memory::stats().await,
-            MemoryAction::Propagate { temporal } => {
-                commands::memory::propagate(temporal).await
-            }
+            MemoryAction::Propagate { temporal } => commands::memory::propagate(temporal).await,
             MemoryAction::List { limit } => commands::memory::list(limit).await,
             MemoryAction::Capture {
                 summary,
@@ -326,7 +322,11 @@ async fn main() -> Result<()> {
                 tags,
             } => commands::memory::capture(summary, task_type, outcome, tags).await,
         },
-        Commands::Sync { action, dry_run, limit } => match action {
+        Commands::Sync {
+            action,
+            dry_run,
+            limit,
+        } => match action {
             Some(SyncAction::Status) => commands::sync::status().await,
             None => commands::sync::run(dry_run, limit).await,
         },
@@ -338,18 +338,15 @@ async fn main() -> Result<()> {
             }
         }
         Commands::Backup { action } => match action {
-            BackupAction::Create { output, include_graph } => {
-                commands::backup::create(output, include_graph).await
-            }
+            BackupAction::Create {
+                output,
+                include_graph,
+            } => commands::backup::create(output, include_graph).await,
             BackupAction::Restore { backup_file, force } => {
                 commands::backup::restore(backup_file, force).await
             }
-            BackupAction::List { backup_file } => {
-                commands::backup::list(backup_file).await
-            }
-            BackupAction::Verify { backup_file } => {
-                commands::backup::verify(backup_file).await
-            }
+            BackupAction::List { backup_file } => commands::backup::list(backup_file).await,
+            BackupAction::Verify { backup_file } => commands::backup::verify(backup_file).await,
         },
         Commands::Completions { shell } => {
             let mut cmd = Cli::command();

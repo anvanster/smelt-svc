@@ -6,14 +6,14 @@ use std::fs;
 use std::path::PathBuf;
 use tempfile::TempDir;
 
-use smelt_core::{
-    GitInterface, Git2Interface, SqliteStorage, SmeltGraph,
-    IntentRecord, IntentStatus, Author, AuthorType, Constraint, ContextLinks,
-    SemanticDelta, SemanticChange, ImpactSummary, Visibility,
-};
-use smelt_validator::{SmeltValidator, config::ValidationConfig};
-use smelt_memory::{SmeltMemory, Episode, EpisodeOutcome};
 use chrono::Utc;
+use smelt_core::{
+    Author, AuthorType, Constraint, ContextLinks, Git2Interface, GitInterface, ImpactSummary,
+    IntentRecord, IntentStatus, SemanticChange, SemanticDelta, SmeltGraph, SqliteStorage,
+};
+use std::path::Path;
+use smelt_memory::{Episode, EpisodeOutcome, SmeltMemory};
+use smelt_validator::{config::ValidationConfig, SmeltValidator};
 use uuid::Uuid;
 
 /// Helper to create a test repository with git initialized
@@ -45,7 +45,7 @@ fn create_test_repo() -> (TempDir, PathBuf) {
 }
 
 /// Helper to create smelt directory structure
-fn init_smelt(repo_path: &PathBuf) -> (PathBuf, PathBuf, PathBuf, PathBuf) {
+fn init_smelt(repo_path: &Path) -> (PathBuf, PathBuf, PathBuf, PathBuf) {
     let smelt_dir = repo_path.join(".smelt");
     fs::create_dir_all(&smelt_dir).expect("Failed to create .smelt dir");
 
@@ -90,7 +90,9 @@ fn test_full_workflow_init_to_commit() {
         baseline_snapshot_id: None,
     };
 
-    storage.store_intent(&intent).expect("Failed to store intent");
+    storage
+        .store_intent(&intent)
+        .expect("Failed to store intent");
 
     // 3. Verify intent was stored
     let retrieved = storage.get_intent(intent.id).expect("Failed to get intent");
@@ -117,7 +119,8 @@ pub fn hash_password(password: &str) -> String {
     format!("hashed_{}", password)
 }
 "#,
-    ).expect("Failed to write auth.rs");
+    )
+    .expect("Failed to write auth.rs");
 
     // 6. Stage and commit with git
     std::process::Command::new("git")
@@ -170,16 +173,23 @@ fn test_intent_lifecycle() {
         baseline_snapshot_id: None,
     };
 
-    storage.store_intent(&intent).expect("Failed to store intent");
+    storage
+        .store_intent(&intent)
+        .expect("Failed to store intent");
 
     // Update status to committed
     intent.status = IntentStatus::Committed {
         git_sha: "abc123def456".to_string(),
     };
-    storage.update_intent_status(intent.id, intent.status.clone()).expect("Failed to update intent");
+    storage
+        .update_intent_status(intent.id, intent.status.clone())
+        .expect("Failed to update intent");
 
     // Verify update
-    let retrieved = storage.get_intent(intent.id).expect("Failed to get intent").unwrap();
+    let retrieved = storage
+        .get_intent(intent.id)
+        .expect("Failed to get intent")
+        .unwrap();
     match retrieved.status {
         IntentStatus::Committed { git_sha } => {
             assert_eq!(git_sha, "abc123def456");
@@ -214,7 +224,9 @@ fn test_semantic_delta_creation() {
         baseline_snapshot_id: None,
     };
 
-    storage.store_intent(&intent).expect("Failed to store intent");
+    storage
+        .store_intent(&intent)
+        .expect("Failed to store intent");
 
     // Create a semantic delta
     let delta = SemanticDelta {
@@ -263,7 +275,9 @@ fn test_semantic_delta_creation() {
     assert_eq!(retrieved.impact_summary.functions_added, 2);
 
     // Also verify retrieval by intent ID
-    let deltas_for_intent = storage.get_deltas_for_intent(intent.id).expect("Failed to get deltas");
+    let deltas_for_intent = storage
+        .get_deltas_for_intent(intent.id)
+        .expect("Failed to get deltas");
     assert_eq!(deltas_for_intent.len(), 1);
 
     println!("Semantic delta test passed!");
@@ -275,7 +289,7 @@ fn test_validation_pipeline() {
     let (_smelt_dir, db_path, graph_path, _memory_path) = init_smelt(&repo_path);
 
     let storage = SqliteStorage::open(&db_path).expect("Failed to open storage");
-    let graph = SmeltGraph::open(&graph_path).expect("Failed to open graph");
+    let _graph = SmeltGraph::open(&graph_path).expect("Failed to open graph");
 
     // Create intent with constraints
     let intent = IntentRecord {
@@ -284,19 +298,19 @@ fn test_validation_pipeline() {
         author: test_author(),
         goal: "Small bugfix".to_string(),
         rationale: None,
-        constraints: vec![
-            Constraint {
-                name: "max_files".to_string(),
-                value: "3".to_string(),
-                required: true,
-            },
-        ],
+        constraints: vec![Constraint {
+            name: "max_files".to_string(),
+            value: "3".to_string(),
+            required: true,
+        }],
         context_links: ContextLinks::default(),
         status: IntentStatus::InProgress,
         baseline_snapshot_id: None,
     };
 
-    storage.store_intent(&intent).expect("Failed to store intent");
+    storage
+        .store_intent(&intent)
+        .expect("Failed to store intent");
 
     // Create a delta
     let delta = SemanticDelta {
@@ -305,13 +319,11 @@ fn test_validation_pipeline() {
         timestamp: Utc::now(),
         from_snapshot: Uuid::new_v4(),
         to_snapshot: Uuid::new_v4(),
-        changes: vec![
-            SemanticChange::BodyModified {
-                name: "handle_request".to_string(),
-                file: "src/handler.rs".to_string(),
-                complexity_delta: 2,
-            },
-        ],
+        changes: vec![SemanticChange::BodyModified {
+            name: "handle_request".to_string(),
+            file: "src/handler.rs".to_string(),
+            complexity_delta: 2,
+        }],
         impact_summary: ImpactSummary {
             files_affected: 5, // This exceeds max_files constraint
             functions_added: 0,
@@ -357,17 +369,27 @@ fn test_memory_capture_and_retrieval() {
         EpisodeOutcome::Success,
     )
     .with_project("test-project".to_string())
-    .with_tags(vec!["auth".to_string(), "jwt".to_string(), "security".to_string()])
+    .with_tags(vec![
+        "auth".to_string(),
+        "jwt".to_string(),
+        "security".to_string(),
+    ])
     .with_files(vec!["src/auth.rs".to_string(), "src/jwt.rs".to_string()]);
 
     let episode_id = memory.capture(episode).expect("Failed to capture episode");
 
     // Record feedback
-    memory.record_feedback(episode_id, true).expect("Failed to record feedback");
-    memory.record_feedback(episode_id, true).expect("Failed to record feedback");
+    memory
+        .record_feedback(episode_id, true)
+        .expect("Failed to record feedback");
+    memory
+        .record_feedback(episode_id, true)
+        .expect("Failed to record feedback");
 
     // Retrieve similar episodes
-    let results = memory.retrieve("authentication jwt", 5).expect("Failed to retrieve");
+    let results = memory
+        .retrieve("authentication jwt", 5)
+        .expect("Failed to retrieve");
 
     assert!(!results.is_empty());
     assert!(results[0].episode.summary.contains("authentication"));
@@ -400,12 +422,16 @@ fn test_memory_utility_propagation() {
 
         // Mark some as helpful
         if i % 2 == 0 {
-            memory.record_feedback(id, true).expect("Failed to record feedback");
+            memory
+                .record_feedback(id, true)
+                .expect("Failed to record feedback");
         }
     }
 
     // Run utility propagation
-    let stats = memory.propagate_utility(false).expect("Failed to propagate");
+    let stats = memory
+        .propagate_utility(false)
+        .expect("Failed to propagate");
 
     println!("Propagation stats: {:?}", stats);
     assert!(stats.episodes_updated > 0);
@@ -442,14 +468,18 @@ fn test_git_interface() {
     assert!(!head.is_empty());
 
     // Check for uncommitted changes (should be none)
-    let uncommitted = git.has_uncommitted_changes().expect("Failed to check changes");
+    let uncommitted = git
+        .has_uncommitted_changes()
+        .expect("Failed to check changes");
     assert!(!uncommitted);
 
     // Make a change
     fs::write(repo_path.join("test.txt"), "Modified!").expect("Failed to write file");
 
     // Now should have uncommitted changes
-    let uncommitted = git.has_uncommitted_changes().expect("Failed to check changes");
+    let uncommitted = git
+        .has_uncommitted_changes()
+        .expect("Failed to check changes");
     assert!(uncommitted);
 
     // Get changed files
@@ -466,7 +496,7 @@ fn test_end_to_end_smelt_workflow() {
 
     // Initialize all components
     let storage = SqliteStorage::open(&db_path).expect("Failed to open storage");
-    let graph = SmeltGraph::open(&graph_path).expect("Failed to open graph");
+    let _graph = SmeltGraph::open(&graph_path).expect("Failed to open graph");
     let mut memory = SmeltMemory::open(&memory_path).expect("Failed to open memory");
     let _git = Git2Interface::open(&repo_path).expect("Failed to open git");
 
@@ -482,7 +512,9 @@ fn test_end_to_end_smelt_workflow() {
         status: IntentStatus::InProgress,
         baseline_snapshot_id: None,
     };
-    storage.store_intent(&intent).expect("Failed to store intent");
+    storage
+        .store_intent(&intent)
+        .expect("Failed to store intent");
 
     // 2. Make code changes
     let src_dir = repo_path.join("src");
@@ -503,7 +535,8 @@ pub fn log(level: LogLevel, message: &str) {
     println!("[{:?}] {}", level, message);
 }
 "#,
-    ).expect("Failed to write logging.rs");
+    )
+    .expect("Failed to write logging.rs");
 
     // 3. Create semantic delta
     let delta = SemanticDelta {

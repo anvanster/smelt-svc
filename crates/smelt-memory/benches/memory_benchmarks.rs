@@ -1,6 +1,6 @@
 //! Benchmarks for smelt-memory operations
 
-use criterion::{black_box, criterion_group, criterion_main, Criterion, BenchmarkId};
+use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
 use smelt_memory::{Episode, EpisodeOutcome, SmeltMemory};
 use tempfile::TempDir;
 
@@ -42,24 +42,18 @@ fn bench_episode_retrieval(c: &mut Criterion) {
 
     // Benchmark retrieval with different episode counts
     for size in [10, 50].iter() {
-        group.bench_with_input(
-            BenchmarkId::new("retrieve", size),
-            size,
-            |b, &size| {
-                let temp_dir = TempDir::new().unwrap();
-                let mut memory = SmeltMemory::open(temp_dir.path()).unwrap();
+        group.bench_with_input(BenchmarkId::new("retrieve", size), size, |b, &size| {
+            let temp_dir = TempDir::new().unwrap();
+            let mut memory = SmeltMemory::open(temp_dir.path()).unwrap();
 
-                // Pre-populate
-                for i in 0..size {
-                    let episode = create_test_episode(&format!("prepop_{}", i));
-                    memory.capture(episode).unwrap();
-                }
+            // Pre-populate
+            for i in 0..size {
+                let episode = create_test_episode(&format!("prepop_{}", i));
+                memory.capture(episode).unwrap();
+            }
 
-                b.iter(|| {
-                    memory.retrieve(black_box("test benchmarking"), 5).unwrap()
-                });
-            },
-        );
+            b.iter(|| memory.retrieve(black_box("test benchmarking"), 5).unwrap());
+        });
     }
 
     group.finish();
@@ -85,9 +79,7 @@ fn bench_utility_computation(c: &mut Criterion) {
             }
         }
 
-        b.iter(|| {
-            memory.propagate_utility(black_box(false)).unwrap()
-        });
+        b.iter(|| memory.propagate_utility(black_box(false)).unwrap());
     });
 
     group.finish();

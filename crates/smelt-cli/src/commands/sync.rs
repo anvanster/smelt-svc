@@ -83,9 +83,7 @@ pub async fn run(dry_run: bool, limit: usize) -> Result<()> {
     if dry_run {
         println!("Dry run - no changes made.");
         println!();
-        println!(
-            "To create synthetic intents for these commits, run without --dry-run"
-        );
+        println!("To create synthetic intents for these commits, run without --dry-run");
         return Ok(());
     }
 
@@ -163,9 +161,7 @@ pub async fn status() -> Result<()> {
 
     if untracked > 0 {
         println!();
-        println!(
-            "Run 'smelt sync' to create synthetic intents for untracked commits."
-        );
+        println!("Run 'smelt sync' to create synthetic intents for untracked commits.");
     }
 
     Ok(())

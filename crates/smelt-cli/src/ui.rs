@@ -1,5 +1,7 @@
 //! UI utilities for consistent CLI output and error handling
 
+#![allow(dead_code)]
+
 use smelt_core::{GitInterface, SmeltError};
 use std::path::Path;
 
