@@ -6,6 +6,7 @@ members = [
     "crates/smelt-memory",
     "crates/smelt-cli",
     "crates/smelt-api",
+    "crates/smelt-mcp",
     "tests/integration",
 ]
 
