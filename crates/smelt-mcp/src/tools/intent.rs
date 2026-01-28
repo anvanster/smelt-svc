@@ -55,6 +55,23 @@ pub fn tool_smelt_intent_list() -> Tool {
     }
 }
 
+/// Get the tool definition for smelt_intent_abandon
+pub fn tool_smelt_intent_abandon() -> Tool {
+    Tool {
+        name: "smelt_intent_abandon".to_string(),
+        description: "Abandon an intent that is no longer needed".to_string(),
+        input_schema: schema(
+            json!({
+                "intent_id": {
+                    "type": "string",
+                    "description": "Intent ID (or prefix) to abandon"
+                }
+            }),
+            vec!["intent_id"],
+        ),
+    }
+}
+
 /// Handle smelt_intent_create tool call
 pub async fn handle_intent_create(
     args: &Value,
@@ -238,6 +255,61 @@ pub async fn handle_intent_list(
 
         output.push('\n');
     }
+
+    Ok(output)
+}
+
+/// Handle smelt_intent_abandon tool call
+pub async fn handle_intent_abandon(
+    args: &Value,
+    context: &mut SmeltContext,
+) -> Result<String, String> {
+    // Try to load context if not already initialized
+    if !context.is_initialized() {
+        match context.try_load() {
+            Ok(true) => {}
+            Ok(false) => {
+                return Err("Smelt is not initialized. Run smelt_init first.".to_string());
+            }
+            Err(e) => {
+                return Err(format!("Failed to load Smelt: {}", e));
+            }
+        }
+    }
+
+    let intent_id = args
+        .get("intent_id")
+        .and_then(|v| v.as_str())
+        .ok_or("Missing required parameter: intent_id")?;
+
+    let storage = context.storage().map_err(|e| e.to_string())?;
+
+    // Find intent by prefix
+    let intent = storage
+        .find_intent_by_prefix(intent_id)
+        .map_err(|e| e.to_string())?
+        .ok_or_else(|| format!("Intent not found: {}", intent_id))?;
+
+    // Check if intent can be abandoned
+    match &intent.status {
+        IntentStatus::Committed { .. } => {
+            return Err("Cannot abandon a committed intent.".to_string());
+        }
+        IntentStatus::Abandoned => {
+            return Err("Intent is already abandoned.".to_string());
+        }
+        _ => {}
+    }
+
+    // Update status to abandoned
+    storage
+        .update_intent_status(intent.id, IntentStatus::Abandoned)
+        .map_err(|e| e.to_string())?;
+
+    let mut output = String::from("🗑️ Intent abandoned successfully!\n\n");
+    output.push_str(&format!("ID: {}\n", &intent.id.to_string()[..8]));
+    output.push_str(&format!("Goal: {}\n", intent.goal));
+    output.push_str("Status: Abandoned\n");
 
     Ok(output)
 }

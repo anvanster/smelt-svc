@@ -31,6 +31,7 @@ pub fn get_tools() -> Vec<Tool> {
         // Intent tools
         tool_smelt_intent_create(),
         tool_smelt_intent_list(),
+        tool_smelt_intent_abandon(),
         // Memory tools
         tool_smelt_memory_search(),
         tool_smelt_memory_capture(),
@@ -49,6 +50,7 @@ pub async fn execute_tool(name: &str, args: &Value, context: &mut SmeltContext) 
         // Intent tools
         "smelt_intent_create" => handle_intent_create(args, context).await,
         "smelt_intent_list" => handle_intent_list(args, context).await,
+        "smelt_intent_abandon" => handle_intent_abandon(args, context).await,
         // Memory tools
         "smelt_memory_search" => handle_memory_search(args, context).await,
         "smelt_memory_capture" => handle_memory_capture(args, context).await,
