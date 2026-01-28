@@ -147,6 +147,47 @@ Smelt includes a contextual memory system that learns from your development hist
 - Retrieves relevant past experiences via semantic search
 - Improves over time through feedback and utility propagation
 
+## MCP Server (AI Assistant Integration)
+
+Smelt includes an MCP (Model Context Protocol) server that allows AI assistants like Claude Code to interact with Smelt's semantic version control capabilities.
+
+### Installation
+
+```bash
+cargo install smelt-mcp
+```
+
+### Configuration
+
+Add to your Claude Code MCP configuration (`~/.claude.json`):
+
+```json
+{
+  "mcpServers": {
+    "smelt": {
+      "type": "stdio",
+      "command": "smelt-mcp",
+      "args": [],
+      "env": {}
+    }
+  }
+}
+```
+
+### Available Tools
+
+| Tool | Description |
+|------|-------------|
+| `smelt_init` | Initialize Smelt in a repository |
+| `smelt_status` | Show semantic status of working directory |
+| `smelt_validate` | Validate changes against constraints |
+| `smelt_commit` | Commit with semantic delta attached |
+| `smelt_intent_create` | Create a new intent |
+| `smelt_intent_list` | List intents with optional filtering |
+| `smelt_memory_search` | Search episodic memory |
+| `smelt_memory_capture` | Capture a task as an episode |
+| `smelt_memory_feedback` | Provide feedback on retrieved episodes |
+
 ## Architecture
 
 ```
@@ -156,7 +197,8 @@ smelt-svc/
 │   ├── smelt-validator/  # Semantic and architectural validation
 │   ├── smelt-memory/     # Episodic memory system
 │   ├── smelt-cli/        # Command-line interface
-│   └── smelt-api/        # REST API server
+│   ├── smelt-api/        # REST API server
+│   └── smelt-mcp/        # MCP server for AI assistants
 └── tests/
     └── integration/      # End-to-end tests
 ```
