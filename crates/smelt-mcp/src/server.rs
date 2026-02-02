@@ -148,8 +148,8 @@ mod tests {
         let result = response.result.unwrap();
         let tools = result["tools"].as_array().unwrap();
 
-        // Should have 9 tools
-        assert_eq!(tools.len(), 9);
+        // Should have 10 tools
+        assert_eq!(tools.len(), 10);
 
         // Check tool names
         let tool_names: Vec<&str> = tools.iter().filter_map(|t| t["name"].as_str()).collect();
@@ -160,6 +160,7 @@ mod tests {
         assert!(tool_names.contains(&"smelt_commit"));
         assert!(tool_names.contains(&"smelt_intent_create"));
         assert!(tool_names.contains(&"smelt_intent_list"));
+        assert!(tool_names.contains(&"smelt_intent_abandon"));
         assert!(tool_names.contains(&"smelt_memory_search"));
         assert!(tool_names.contains(&"smelt_memory_capture"));
         assert!(tool_names.contains(&"smelt_memory_feedback"));
