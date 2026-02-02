@@ -316,9 +316,7 @@ async fn attempt_repair(check_name: &str, smelt_dir: &Path) -> Option<bool> {
                     let name = entry.file_name();
                     let name_str = name.to_string_lossy();
                     for pattern in &orphaned_patterns {
-                        if name_str.ends_with(pattern)
-                            && fs::remove_file(entry.path()).is_ok()
-                        {
+                        if name_str.ends_with(pattern) && fs::remove_file(entry.path()).is_ok() {
                             removed += 1;
                         }
                     }

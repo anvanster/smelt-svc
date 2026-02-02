@@ -3,6 +3,10 @@ ignore/
 target/
 Cargo.lock
 
+# Binary distribution
+bin/
+prebuilt/
+
 # Smelt internal data
 .smelt/
 

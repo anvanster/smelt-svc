@@ -11,9 +11,9 @@ use smelt_core::{
     Author, AuthorType, Constraint, ContextLinks, Git2Interface, GitInterface, ImpactSummary,
     IntentRecord, IntentStatus, SemanticChange, SemanticDelta, SmeltGraph, SqliteStorage,
 };
-use std::path::Path;
 use smelt_memory::{Episode, EpisodeOutcome, SmeltMemory};
 use smelt_validator::{config::ValidationConfig, SmeltValidator};
+use std::path::Path;
 use uuid::Uuid;
 
 /// Helper to create a test repository with git initialized
