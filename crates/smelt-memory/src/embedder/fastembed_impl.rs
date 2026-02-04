@@ -20,6 +20,15 @@ impl FastEmbedder {
 
     /// Create a FastEmbedder with a specific model
     pub fn with_model(model: EmbeddingModel) -> MemoryResult<Self> {
+        // Set cache directory to ~/.smelt/fastembed_cache to avoid polluting project directories
+        if std::env::var("FASTEMBED_CACHE_PATH").is_err() {
+            if let Some(home) = dirs::home_dir() {
+                let cache_dir = home.join(".smelt").join("fastembed_cache");
+                let _ = std::fs::create_dir_all(&cache_dir);
+                unsafe { std::env::set_var("FASTEMBED_CACHE_PATH", &cache_dir) };
+            }
+        }
+
         let embedding =
             TextEmbedding::try_new(InitOptions::new(model).with_show_download_progress(true))
                 .map_err(|e| {

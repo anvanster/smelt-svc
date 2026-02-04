@@ -19,11 +19,15 @@ tokio = { workspace = true }
 rusqlite = { workspace = true }
 async-trait = { workspace = true }
 
+# Vector database
+vectrust = "0.1"
+tempfile = "3"
+dirs = "5.0"
+
 # Embeddings
 fastembed = { workspace = true }
 
 [dev-dependencies]
-tempfile = "3"
 tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
 criterion = { workspace = true }
 

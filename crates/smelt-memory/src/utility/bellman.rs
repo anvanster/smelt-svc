@@ -55,7 +55,7 @@ pub fn bellman_propagate(
         };
 
         // Find similar episodes
-        let similar = vectors.search(embedding, 10);
+        let similar = vectors.search(&embedding, 10);
 
         // Calculate utility update from similar episodes
         let mut weighted_utility = 0.0;
