@@ -21,19 +21,21 @@ impl FastEmbedder {
     /// Create a FastEmbedder with a specific model
     pub fn with_model(model: EmbeddingModel) -> MemoryResult<Self> {
         // Set cache directory to ~/.smelt/fastembed_cache to avoid polluting project directories
-        if std::env::var("FASTEMBED_CACHE_PATH").is_err() {
-            if let Some(home) = dirs::home_dir() {
-                let cache_dir = home.join(".smelt").join("fastembed_cache");
-                let _ = std::fs::create_dir_all(&cache_dir);
-                unsafe { std::env::set_var("FASTEMBED_CACHE_PATH", &cache_dir) };
-            }
+        let cache_dir = dirs::home_dir()
+            .map(|home| home.join(".smelt").join("fastembed_cache"));
+
+        if let Some(ref dir) = cache_dir {
+            let _ = std::fs::create_dir_all(dir);
         }
 
-        let embedding =
-            TextEmbedding::try_new(InitOptions::new(model).with_show_download_progress(true))
-                .map_err(|e| {
-                    MemoryError::Embedding(format!("Failed to initialize embedding model: {}", e))
-                })?;
+        let mut opts = InitOptions::new(model).with_show_download_progress(true);
+        if let Some(dir) = cache_dir {
+            opts = opts.with_cache_dir(dir);
+        }
+
+        let embedding = TextEmbedding::try_new(opts).map_err(|e| {
+            MemoryError::Embedding(format!("Failed to initialize embedding model: {}", e))
+        })?;
 
         // Get dimension from first test embedding
         let dimension = match embedding.embed(vec!["test"], None) {
