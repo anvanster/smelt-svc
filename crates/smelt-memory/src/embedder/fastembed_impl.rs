@@ -21,11 +21,14 @@ impl FastEmbedder {
     /// Create a FastEmbedder with a specific model
     pub fn with_model(model: EmbeddingModel) -> MemoryResult<Self> {
         // Set cache directory to ~/.smelt/fastembed_cache to avoid polluting project directories
+        // MUST set FASTEMBED_CACHE_DIR before InitOptions::new() — its Default impl
+        // calls get_cache_dir() which falls back to ".fastembed_cache" in CWD.
         let cache_dir = dirs::home_dir()
             .map(|home| home.join(".smelt").join("fastembed_cache"));
 
         if let Some(ref dir) = cache_dir {
             let _ = std::fs::create_dir_all(dir);
+            unsafe { std::env::set_var("FASTEMBED_CACHE_DIR", dir) };
         }
 
         let mut opts = InitOptions::new(model).with_show_download_progress(true);
