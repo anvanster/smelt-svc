@@ -1,3 +1,6 @@
+// Copyright 2024-2026 Andrey Vasilevsky <anvanster@gmail.com>
+// SPDX-License-Identifier: Apache-2.0
+
 //! Wilson score calculation for Bayesian confidence
 //!
 //! Wilson score provides a lower bound confidence interval for a Bernoulli

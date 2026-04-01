@@ -1,3 +1,6 @@
+// Copyright 2024-2026 Andrey Vasilevsky <anvanster@gmail.com>
+// SPDX-License-Identifier: Apache-2.0
+
 //! Utility-based ranking for episode retrieval
 
 use super::decay::{apply_decay, DecayParams};

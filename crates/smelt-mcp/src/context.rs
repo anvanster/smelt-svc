@@ -1,3 +1,6 @@
+// Copyright 2024-2026 Andrey Vasilevsky <anvanster@gmail.com>
+// SPDX-License-Identifier: Apache-2.0
+
 //! SmeltContext - Shared state for MCP server operations
 
 use crate::error::{McpError, McpResult};

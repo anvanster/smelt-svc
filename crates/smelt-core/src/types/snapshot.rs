@@ -1,3 +1,6 @@
+// Copyright 2024-2026 Andrey Vasilevsky <anvanster@gmail.com>
+// SPDX-License-Identifier: Apache-2.0
+
 //! Graph snapshot types - serialized graph state with metadata
 
 use chrono::{DateTime, Utc};

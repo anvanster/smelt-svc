@@ -1,3 +1,6 @@
+// Copyright 2024-2026 Andrey Vasilevsky <anvanster@gmail.com>
+// SPDX-License-Identifier: Apache-2.0
+
 //! MCP Protocol types - JSON-RPC 2.0 implementation
 //!
 //! This module defines the core types for the Model Context Protocol (MCP)

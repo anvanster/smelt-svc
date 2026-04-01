@@ -1,3 +1,6 @@
+// Copyright 2024-2026 Andrey Vasilevsky <anvanster@gmail.com>
+// SPDX-License-Identifier: Apache-2.0
+
 //! Exponential decay for time-based utility degradation
 //!
 //! Implements exponential decay to reduce the utility of older episodes,
