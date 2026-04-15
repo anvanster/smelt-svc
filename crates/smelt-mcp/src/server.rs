@@ -29,23 +29,36 @@ impl McpServer {
         }
     }
 
-    /// Handle an incoming JSON-RPC request
-    pub async fn handle_request(&mut self, request: JsonRpcRequest) -> JsonRpcResponse {
+    /// Handle an incoming JSON-RPC message.
+    ///
+    /// Returns `None` for notifications (messages without an `id`), per JSON-RPC 2.0 spec.
+    pub async fn handle_request(&mut self, request: JsonRpcRequest) -> Option<JsonRpcResponse> {
+        let is_notification = request.id.is_none();
         let id = request.id.clone().unwrap_or(Value::Null);
 
         let result = match request.method.as_str() {
             "initialize" => self.handle_initialize(&request.params),
-            "initialized" => self.handle_initialized(),
+            "initialized" | "notifications/initialized" => self.handle_initialized(),
+            "notifications/cancelled" | "notifications/roots/list_changed" => Ok(json!({})),
             "tools/list" => self.handle_tools_list(),
             "tools/call" => self.handle_tools_call(&request.params).await,
             "shutdown" => self.handle_shutdown(),
+            _ if is_notification => {
+                tracing::debug!("Ignoring unknown notification: {}", request.method);
+                return None;
+            }
             _ => Err(JsonRpcError::method_not_found(&request.method)),
         };
 
-        match result {
+        // Notifications must never receive a response (JSON-RPC 2.0 §4.1)
+        if is_notification {
+            return None;
+        }
+
+        Some(match result {
             Ok(value) => JsonRpcResponse::success(id, value),
             Err(error) => JsonRpcResponse::error(id, error),
-        }
+        })
     }
 
     /// Handle initialize request
@@ -120,6 +133,15 @@ mod tests {
         }
     }
 
+    fn make_notification(method: &str) -> JsonRpcRequest {
+        JsonRpcRequest {
+            jsonrpc: "2.0".to_string(),
+            id: None,
+            method: method.to_string(),
+            params: json!({}),
+        }
+    }
+
     #[tokio::test]
     async fn test_initialize() {
         let context = SmeltContext::new();
@@ -128,7 +150,7 @@ mod tests {
         assert!(!server.is_initialized());
 
         let request = make_request("initialize", json!({}));
-        let response = server.handle_request(request).await;
+        let response = server.handle_request(request).await.expect("should return response");
 
         assert!(response.result.is_some());
         assert!(response.error.is_none());
@@ -145,7 +167,7 @@ mod tests {
         let mut server = McpServer::new(context);
 
         let request = make_request("tools/list", json!({}));
-        let response = server.handle_request(request).await;
+        let response = server.handle_request(request).await.expect("should return response");
 
         assert!(response.result.is_some());
         let result = response.result.unwrap();
@@ -175,7 +197,7 @@ mod tests {
         let mut server = McpServer::new(context);
 
         let request = make_request("unknown/method", json!({}));
-        let response = server.handle_request(request).await;
+        let response = server.handle_request(request).await.expect("should return response");
 
         assert!(response.error.is_some());
         let error = response.error.unwrap();
@@ -194,9 +216,29 @@ mod tests {
 
         // Shutdown
         let shutdown_request = make_request("shutdown", json!({}));
-        let response = server.handle_request(shutdown_request).await;
+        let response = server.handle_request(shutdown_request).await.expect("should return response");
 
         assert!(response.result.is_some());
         assert!(!server.is_initialized());
+    }
+
+    #[tokio::test]
+    async fn test_notifications_return_none() {
+        let context = SmeltContext::new();
+        let mut server = McpServer::new(context);
+
+        // Known notifications should return None
+        for method in &["initialized", "notifications/initialized", "notifications/cancelled", "notifications/roots/list_changed"] {
+            let notification = make_notification(method);
+            assert!(
+                server.handle_request(notification).await.is_none(),
+                "{} notification should not produce a response",
+                method,
+            );
+        }
+
+        // Unknown notification (no id) should also return None
+        let unknown = make_notification("notifications/unknown");
+        assert!(server.handle_request(unknown).await.is_none());
     }
 }

@@ -78,11 +78,10 @@ async fn run_server() -> Result<()> {
 
         tracing::info!("Handling method: {}", request.method);
 
-        // Handle request
-        let response = server.handle_request(request).await;
-
-        // Send response
-        write_response(&mut stdout, &response)?;
+        // Handle request — notifications return None (no response per JSON-RPC 2.0)
+        if let Some(response) = server.handle_request(request).await {
+            write_response(&mut stdout, &response)?;
+        }
     }
 
     tracing::info!("Smelt MCP server shutting down");
