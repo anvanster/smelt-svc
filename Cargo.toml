@@ -46,7 +46,7 @@ tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 # Git
-git2 = "0.19"
+git2 = { version = "0.19", default-features = false }
 
 # Database
 rusqlite = { version = "0.32", features = ["bundled"] }
