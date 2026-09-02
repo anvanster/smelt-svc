@@ -150,7 +150,10 @@ mod tests {
         assert!(!server.is_initialized());
 
         let request = make_request("initialize", json!({}));
-        let response = server.handle_request(request).await.expect("should return response");
+        let response = server
+            .handle_request(request)
+            .await
+            .expect("should return response");
 
         assert!(response.result.is_some());
         assert!(response.error.is_none());
@@ -167,7 +170,10 @@ mod tests {
         let mut server = McpServer::new(context);
 
         let request = make_request("tools/list", json!({}));
-        let response = server.handle_request(request).await.expect("should return response");
+        let response = server
+            .handle_request(request)
+            .await
+            .expect("should return response");
 
         assert!(response.result.is_some());
         let result = response.result.unwrap();
@@ -197,7 +203,10 @@ mod tests {
         let mut server = McpServer::new(context);
 
         let request = make_request("unknown/method", json!({}));
-        let response = server.handle_request(request).await.expect("should return response");
+        let response = server
+            .handle_request(request)
+            .await
+            .expect("should return response");
 
         assert!(response.error.is_some());
         let error = response.error.unwrap();
@@ -216,7 +225,10 @@ mod tests {
 
         // Shutdown
         let shutdown_request = make_request("shutdown", json!({}));
-        let response = server.handle_request(shutdown_request).await.expect("should return response");
+        let response = server
+            .handle_request(shutdown_request)
+            .await
+            .expect("should return response");
 
         assert!(response.result.is_some());
         assert!(!server.is_initialized());
@@ -228,7 +240,12 @@ mod tests {
         let mut server = McpServer::new(context);
 
         // Known notifications should return None
-        for method in &["initialized", "notifications/initialized", "notifications/cancelled", "notifications/roots/list_changed"] {
+        for method in &[
+            "initialized",
+            "notifications/initialized",
+            "notifications/cancelled",
+            "notifications/roots/list_changed",
+        ] {
             let notification = make_notification(method);
             assert!(
                 server.handle_request(notification).await.is_none(),
